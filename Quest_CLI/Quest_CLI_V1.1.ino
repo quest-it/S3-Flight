@@ -335,11 +335,6 @@ typedef struct {
 #define num_commands 37
 CommandsStruct global_commands[num_commands];
 void init_global_commands() {
-    static bool global_commands_init = false;
-    if (global_commands_init) {
-        return;
-    }
-
     int i = 0;
     global_commands[i] = CommandsStruct { "?", &cmd_help, &help_help }; i++;
     global_commands[i] = CommandsStruct { "help", &cmd_help, &help_help }; i++;
@@ -525,6 +520,8 @@ void SoftwareReset(void) {
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 void setup() {
+  init_global_commands();
+
   Serial.begin(115200);
   //    while(!Serial);       //wait for serial to be ready
   //
@@ -775,8 +772,6 @@ void parse_line() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int execute() {
-  init_global_commands(); // make sure the global commands are initialized
-
   for (int i = 0; i < num_commands; i++) {
     if (strcmp(args[0], global_commands[i].name) == 0) {
       return (*global_commands[i].command)();
@@ -797,9 +792,6 @@ int cmd_help() {
     help_help();
     return 0;
   }
-
-  // Make sure the commands are initilized
-  init_global_commands();
 
   // Find the command that was triggered.
   for (int i = 0; i < num_commands; i++)
