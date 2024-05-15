@@ -172,4 +172,6 @@ int SystemSetup();
 uint8_t Getchar();
 int ReadSetup();
 
+#define LOG_FILENAME "syslog.txt"
+
 #endif

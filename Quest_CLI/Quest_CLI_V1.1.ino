@@ -15,7 +15,7 @@
   20220906 CLI_14
   20220916 CLI_14 finished view commmand to view photos in terminal,
   20221011 CLI_17 different serial res photos, made and fixed text output with photo, created user text area, made text file
-        photo file with PN (photo number), Text timing, timed charator sd writing time open,write,close 8.7ms, most time open close
+        photo file with PN (photo number), Text timing, timed character sd writing time open,write,close 8.7ms, most time open close
         csv? did tdump command
   20230329 CLI_20 Stable test program with start of flight
   20230329 CLI_21 Add SD format(sd card) and free(space on disk free) stack and heap output, on format reset system
@@ -226,7 +226,7 @@ char PN[8] = {"1234567"};   //converted photonumber into ascii to send to master
 //
 //---------------- Temp number for test ------------------
 // Note: download number starts at 1000000 to reserve 7 places in the ID/photonumber array
-//   for a total of 7 charators, printing and outputing of array only outputs siginifite entries
+//   for a total of 7 characters, printing and outputing of array only outputs siginifite entries
 //   this is a cludge and work around for now, must ba a better way....!!
 //
 int download_number = 1000000;
@@ -497,36 +497,35 @@ int freeMemory() {
 }
 //----------------------------------------------------------------
 //----------------------------------------------------------------
-//----  Send one charator to logfile ----  open+write+close
+//----  Send one character to logfile ----  open+write+close
 //      approx = 8.03ms in time
 //---------------------------------------------------------------
 void logit(uint8_t  x) {
-  Logfile = SD.open("syslog.txt", FILE_WRITE);  //open log file ?
-  if (Logfile) {                                //with logfile is open
-    Logfile.write(x);                         //write the value to file
+  Logfile = SD.open(LOG_FILENAME, FILE_WRITE);                          //open log file ?
+  if (Logfile) {                                                        //with logfile is open
+    Logfile.write(x);                                                   //write the value to file
+    Logfile.close();                                                    //close the log file
   }
-  else {                                        //if not open say error
-    Serial.println("\r\nlogit error");          //Terminal output here
+  else {                                                                //if not open say error
+    Serial.println("\r\nlogit error - could not open file");            //Terminal output here
   }
-  Logfile.close();                              //close the log file
 }
 //---------------------------------------------------------------
 //----  Send string to logfile ----  open+write string+close
 //      approx =  in time
 //---------------------------------------------------------------
-void logit_string() {                           //store string
-  Logfile = SD.open("syslog.txt", FILE_WRITE);  //open syslog file
-  if (Logfile) {                                //can open the file
-    Logfile.println();                          //add a carrage return/line feed
-    delayMicroseconds(100);                     //wait 100 microsec
-    for (uint8_t x = 0x20; x < 128; x++) {      //print a string to log file
-      Logfile.write(x);                         //write one charator at a time
-    }                                           //close string
-  }                                             //close the open log file
-  else {                                        //or else
-    Serial.println("\r\nlogit error");          //error can not open log file
-  }                                            //close error else
-  Logfile.close();                             //close the log file
+void logit_string() {
+  Logfile = SD.open(LOG_FILENAME, FILE_WRITE);                          //open syslog file
+  if (!Logfile) {                                                       //can open the file
+    Serial.println("\r\nlogit_string error - coult not open file");     //error can not open log file
+    return;
+  }
+  
+  Logfile.println();                                                    //add a carrage return/line feed
+  delayMicroseconds(100);                                               //wait 100 microsec
+  for (uint8_t x = 0x20; x < 128; x++) {                                //print a string to log file
+    Logfile.write(x);                                                   //write one character at a time
+  Logfile.close();                                                      //close the log file
 }
 //
 //
@@ -716,7 +715,7 @@ void loop() {
   testing = false;                          //default no testing
   while ((millis() - currentMillis) < testtimeout) {
     if (Serial.available()) {
-      char inbyte = Serial.read();              //get the input charator
+      char inbyte = Serial.read();              //get the input character
       if (inbyte == 'T') {                      //if it is a T go to testing
         testing = true;                         //set testing flag to true
         my_cli();                               //execute test command line processor
@@ -1934,7 +1933,7 @@ int cmd_takeSphoto() {        //19 - take a serial photo get a file name then pl
     z++;
   };  //find null char, z now points to pointer
   uint16_t  y = 7 - z;                     //where to place lsd in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {      //how many charators
+  for (uint16_t x = 0 ; x < z; x++) {      //how many characters
     filenameS[y] = ascii[x];           //transfer from aacii array to proper location in text_mission
     y++;                               //pointer to text_mission array
   }
@@ -2111,7 +2110,7 @@ unsigned long entrytime = 0;  //
 //boolean toggle = false;
 int softuarterror = 0;      //0 = no error, 1 = timeout error, >1 = ?? not defined
 long long softtimeout = 2500000;    //  Microseconds softtimeout for received data was 15 n0w 25
-long CharWait = 1100;     //microsec between charators wait time 100;//500;//
+long CharWait = 1100;     //microsec between characters wait time 100;//500;//
 //
 unsigned long int testtime = 0;  //used for test looptiming only
 #define testlooptime  (40000) //
@@ -2211,7 +2210,7 @@ void Hostinterupt() {
     //
     if (millis() - IRQreference > ArmFmHostRequest) {   //must be greater than FmHostRequest Arm time to process it
       IRQreference = millis();                          //capture millis for next time, start of interrupt
-      Chardelay();                                      //wait one charator time for Host to process
+      Chardelay();                                      //wait one character time for Host to process
       softuartwrite(Ack);                               //Acknowledge attention send Ack of low on receive line
       //this will release the serialin line and cause the Host to pull
       //the serialin line high
@@ -2240,8 +2239,8 @@ void Hostinterupt() {
       //
       if ((!softuarterror) == 1) {                //if no error from soft uart fail safe
         if (FmHostRequest == GetStatus) {         //check the Host request for Get Status request
-          Chardelay();                            //Is Status wait one charator delay for system sync and processing
-          Chardelay();                            //wait one charator delay for system sync and processing
+          Chardelay();                            //Is Status wait one character delay for system sync and processing
+          Chardelay();                            //wait one character delay for system sync and processing
           //
           // what is the status of the output Que
           //
@@ -2560,8 +2559,8 @@ void fill_text() {
   }
   //--- photo number done ---
   //--- over write the file ID ----
-  //     text_DataDown[23] = FileID[0];        //Set ID of download 1st Charator
-  //     text_DataDown[24] = FileID[1];        //Set ID of download 2nd Charator
+  //     text_DataDown[23] = FileID[0];        //Set ID of download 1st character
+  //     text_DataDown[24] = FileID[1];        //Set ID of download 2nd character
   //
   //
   // for(int i=0;i<sizeof(text_Mission);i++){
@@ -2775,7 +2774,7 @@ int   initSD() {
   //
   FsDateTime::setCallback(dateTime);            //set time and date for file
   Serial.println("SD init");
-  Logfile = SD.open("syslog.txt", FILE_WRITE);
+  Logfile = SD.open(LOG_FILENAME, FILE_WRITE);
   if (Logfile) {
     Serial.println("syslog.txt created");
     Logfile.print("\r\nBooted ");
@@ -2912,7 +2911,7 @@ int takeSPI() {
     z++;
   };  //find null char, z now points to pointer
   uint16_t  y = 7 - z;                     //y=points to lsd of where to place lsd in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {      //how many charators
+  for (uint16_t x = 0 ; x < z; x++) {      //how many characters
     filenameP[y] = ascii[x];           //transfer from aacii array to proper location in text_mission
     y++;                               //pointer to text_mission array
   }
@@ -3085,14 +3084,14 @@ int SystemSetup() {
 
   //=========================================================================
   uint8_t inputChar = Getchar();
-  Serial.print(">>>>>>>>>>>>>>>>>1st Charator = "); Serial.println(inputChar, HEX);
+  Serial.print(">>>>>>>>>>>>>>>>>1st character = "); Serial.println(inputChar, HEX);
   if (inputChar != 0xFE) {
     writebytefram(inputChar, ID);
   } else {
     return inputChar;                    //timeout abort
   }
   inputChar = Getchar();
-  Serial.print(">>>>>>>>>>>>>>>>>2nd Charator = "); Serial.println(inputChar, HEX);
+  Serial.print(">>>>>>>>>>>>>>>>>2nd character = "); Serial.println(inputChar, HEX);
   if (inputChar != 0xFE) {
     writebytefram(inputChar, ID + 1);  //
   } else {
@@ -3112,7 +3111,7 @@ uint8_t Getchar() {
 
   if (Serial.available()) {             // Check if any data is available to read
     uint8_t inputChar = Serial.read();  // Read the incoming character
-    Serial.print(">>>>>>>>>>>>>>>>>1st Charator = "); Serial.println(inputChar, HEX);
+    Serial.print(">>>>>>>>>>>>>>>>>1st character = "); Serial.println(inputChar, HEX);
     Serial.print(inputChar);
     return inputChar;
   } else {
@@ -3155,7 +3154,7 @@ void nophoto30K(){
   };                                        //end find null char, z now points to pointer
   //----- ascii photo number to file name -----
   uint16_t  y = 7 - z;                     //where to place lsd in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {      //how many charators
+  for (uint16_t x = 0 ; x < z; x++) {      //how many characters
     filenameD[y] = ascii[x];               //transfer from aacii array to proper location in text_mission
     y++;                                   //pointer to text_mission array
   }                                        //end text number
@@ -3256,7 +3255,7 @@ void nophotophoto(){
   };                                        //end find null char, z now points to pointer
   //----- ascii photo number to file name -----
   uint16_t  y = 7 - z;                     //where to place lsd in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {      //how many charators
+  for (uint16_t x = 0 ; x < z; x++) {      //how many characters
     filenameD[y] = ascii[x];               //transfer from aacii array to proper location in text_mission
     y++;                                   //pointer to text_mission array
   }                                        //end text number
