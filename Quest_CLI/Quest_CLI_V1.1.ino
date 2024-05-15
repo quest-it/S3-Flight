@@ -780,14 +780,15 @@ void parse_line() {
 int execute() {
   for (int i = 0; i < num_commands; i++) {
     if (strcmp(args[0], global_commands[i].name) == 0) {
-      return (*global_commands[i].command)();
-      //Serial.print(args[0]);       //???????????????????????????????????????????????
+      return global_commands[i].command();
     }
   }
 
-  Serial.print("Invalid command: ");
-  Serial.print(args[0]);
-  Serial.println(". Type \"?\" for more!");
+  // If there was an argument, print it so they can compare with the command they were trying to call.
+  if (args[0] != NULL) {
+    Serial.printf("Invalid Command: '%s'. ", args[0]);
+  }
+  Serial.println("Type \"?\" for more!");
   return 0;
 }
 
