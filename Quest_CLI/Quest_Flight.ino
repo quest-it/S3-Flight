@@ -191,7 +191,7 @@ void Flying() {
       //
       //------Output to the terminal  days hours min sec
       //
-      getmissionclk();
+      getMissionClock();
       Serial.print(xd); Serial.print(" Days  ");
       Serial.print(xh); Serial.print(" Hours  ");
       Serial.print(xm); Serial.print(" Min  ");

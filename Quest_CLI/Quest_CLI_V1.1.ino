@@ -527,70 +527,39 @@ void logit_string() {                           //store string
     Serial.println("\r\nlogit error");          //error can not open log file
   }                                            //close error else
   Logfile.close();                             //close the log file
-}                                               //
+}
 //
 //
+//
+// Add a portion of the mission clock output.
+void addMissionClockPortion(int units, int initialOffset, const char *label) {
+  itoa(units, ascii, 10);                               // Convert the number to a string
+  int length = strlen(ascii);
+  int output = initialOffset - length;                  // where to start in mission buffer
+  for (uint16_t input = 0 ; input < length; input++) {
+    text_Mission[output] = ascii[input];                // Copy the text
+    output++;
+  }
+
+  text_Mission[initialOffset] = *label;                  // Add the units label
+}
 //
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 //
 // get current mission clock and put it into text_Mission values
 //
-uint16_t getmissionclk() {
-  uint32_t cumunix = readlongFromfram(CumUnix);       //Get cumulative unix mission clock
-  cumunix = readlongFromfram(CumUnix);          //Get cumulative
-  xs = cumunix % 60; cumunix /= 60;    //get sec and /60 for min
-  xm = cumunix % 60; cumunix /= 60;    //get min and /60 for hours
-  xh = cumunix % 24; cumunix /= 24;    //get hours and /24 for days
-  xd = cumunix;                        //get days
+void getMissionClock() {
+  uint32_t cumunix = readlongFromfram(CumUnix);   // Get cumulative unix mission clock
+  cumunix = readlongFromfram(CumUnix);            // Get cumulative
+  xs = cumunix % 60; cumunix /= 60;               // Get sec and /60 for min
+  xm = cumunix % 60; cumunix /= 60;               // Get min and /60 for hours
+  xh = cumunix % 24; cumunix /= 24;               // Get hours and /24 for days
+  xd = cumunix;                                   // Get days
 
-  itoa(xd, ascii, 10);            //convert day and place days in text_mission
-  int z = 0;                     //counter of valid entries in array
-  for (int i = 0; ascii[i] != '\0'; i++) {
-    z++;
-  };  //find firt null
-  uint16_t  y = 21 - z;         //where to start in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) { //how many charators
-    text_Mission[y] = ascii[x]; //transfer from aacii array to proper location in tex_mission
-    y++;                        //pointer to text_mission array
-  }
-  text_Mission[21] = 'D';       //done say D for day
-  //
-  itoa(xh, ascii, 10);
-  z = 0;
-  for (int i = 0; ascii[i] != '\0'; i++) {
-    z++;
-  };
-  y = 25 - z;         //where to start in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {
-    text_Mission[y] = ascii[x];
-    y++;
-  }
-  text_Mission[25] = 'H';
-  //
-  itoa(xm, ascii, 10);
-  z = 0;
-  for (int i = 0; ascii[i] != '\0'; i++) {
-    z++;
-  };
-  y = 29 - z;         //where to start in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {
-    text_Mission[y] = ascii[x];
-    y++;
-  }
-  text_Mission[29] = 'M';
-  //
-  itoa(xs, ascii, 10);
-  z = 0;
-  for (int i = 0; ascii[i] != '\0'; i++) {
-    z++;
-  };
-  y = 33 - z;         //where to start in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {
-    text_Mission[y] = ascii[x];
-    y++;
-  }
-  text_Mission[33] = 'S';
-  return 0;
+  addMissionClockPortion(xd, 21, "D");
+  addMissionClockPortion(xh, 25, "H");
+  addMissionClockPortion(xm, 29, "M");
+  addMissionClockPortion(xs, 33, "S");
 }
 //
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -2576,7 +2545,7 @@ void  readAin() {                           //this gets analog 0,1,2,3
 //
 //
 void fill_text() {
-  getmissionclk();                  //place mission clock in output text array
+  getMissionClock();                  //place mission clock in output text array
 
   //--- do photo number ----
 

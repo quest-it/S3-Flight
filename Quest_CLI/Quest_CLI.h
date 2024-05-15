@@ -77,7 +77,7 @@ void help_settime();
 int freeMemory();
 void logit(uint8_t  x);
 void logit_string();
-uint16_t getmissionclk();
+void getMissionClock();
 void send_T_host(uint8_t x);
 void dateTime(uint16_t* date, uint16_t* time, uint8_t* ms10);
 void SoftwareReset(void);
