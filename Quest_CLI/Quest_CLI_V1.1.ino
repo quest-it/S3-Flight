@@ -247,9 +247,9 @@ bool error_flag = false;
 
 uint32_t looptimebase = 0;               //loop heartbeat time
 #define loopcount     (200)              //for testing main loop heartbeat time
-uint16_t looper = 0;                     //count within loopcount
+uint16_t looper = 0;                     //count within loop count
 uint32_t IRQreference = 0; //
-uint16_t IRQinvalid = 0;                  //set for the next incomming irq to be invalid
+uint16_t IRQinvalid = 0;                  //set for the next incoming irq to be invalid
 //-------------------------------
 //  Mission times
 uint8_t xd = 0;
@@ -322,87 +322,64 @@ int takeSPI(void);      //-------------------------------------
 */
 //
 
-//List of functions pointers corresponding to each command
-int (*commands_func[])() {
-  &cmd_help,
-  &cmd_led,
-  &cmd_exit,
-  &cmd_scani2c,
-  &cmd_bme680,
-  &cmd_time,
-  &cmd_settime,
-  &cmd_dir,
-  &cmd_mkdir,
-  &cmd_rmdir,
-  &cmd_open,
-  &cmd_erase,
-  &cmd_rtcreg,
-  &cmd_DotStar,
-  &cmd_dump,
-  &cmd_sphoto,
-  &cmd_upload,
-  &cmd_io,
-  &cmd_ana,
-  &cmd_takeSphoto,       //19
-  &cmd_stackandheap,     //20
-  &cmd_initQueue,        //21
-  &cmd_text,             //22
-  &cmd_view,             //23
-  &cmd_tdump,            //24
-  &cmd_info,             //25  
-  &cmd_trtc,             //26
-  &cmd_format,           //27
-  &cmd_free,             //28
-  &cmd_takeSpiphoto,     //29
-  &framdump,             //30
-  &cmd_initfram,          //31
-  &framclear,            //32
-  &SystemSetup,           //33
-  &ReadSetup,             //34
-  &cmd_listQue,           //35
-  &cmd_enterTeamID        //36
-};
+// Define the function types
+typedef int (*Func_CMD) ();
+typedef void (*Func_HELP) ();
 
-//List of command names
-const char *commands_str[] = {
-  "?",
-  "led",
-  "exit",
-  "scani2c",
-  "bme680",
-  "time",
-  "settime",
-  "dir",
-  "mkdir",
-  "rmdir",
-  "open",
-  "erase",
-  "rtcreg",
-  "DotStar",
-  "dump",
-  "sphoto",
-  "upload",
-  "io",
-  "ana",
-  "takeSphoto",           //19
-  "stackandheap",         //20
-  "initQueue",         //21
-  "text",           //22
-  "view",           //23
-  "tdump",          //24
-  "info",             //25
-  "trtc",           //26
-  "format",         //27
-  "free",           //28
-  "takeSpiphoto",         //29
-  "framdump",       //30
-  "initfram",       //31
-  "framclear",      //32
-  "SystemSetup",     //33
-  "ReadSetup",       //34
-  "listQue",         //35
-  "enterTeamID"      //36
-};
+typedef struct {
+    const char *name;
+    Func_CMD command;
+    Func_HELP help;
+} CommandsStruct;
+
+#define num_commands 37
+CommandsStruct global_commands[num_commands];
+void init_global_commands() {
+    static bool global_commands_init = false;
+    if (global_commands_init) {
+        return;
+    }
+
+    int i = 0;
+    global_commands[i] = CommandsStruct { "?", &cmd_help, &help_help }; i++;
+    global_commands[i] = CommandsStruct { "help", &cmd_help, &help_help }; i++;
+    global_commands[i] = CommandsStruct { "led", &cmd_led, &help_led }; i++;
+    global_commands[i] = CommandsStruct { "exit", &cmd_exit, &help_exit }; i++;
+    global_commands[i] = CommandsStruct { "scani2c", &cmd_scani2c, &help_scani2c}; i++;
+    global_commands[i] = CommandsStruct { "bme680", &cmd_bme680, &help_bme680}; i++;
+    global_commands[i] = CommandsStruct { "time", &cmd_time, &help_time}; i++;
+    global_commands[i] = CommandsStruct { "settime", &cmd_settime, &help_settime}; i++;
+    global_commands[i] = CommandsStruct { "dir", &cmd_dir, &help_dir}; i++;
+    global_commands[i] = CommandsStruct { "mkdir", &cmd_mkdir, &help_mkdir}; i++;
+    global_commands[i] = CommandsStruct { "rmdir", &cmd_rmdir, &help_rmdir}; i++;
+    global_commands[i] = CommandsStruct { "open", &cmd_open, &help_open}; i++;
+    global_commands[i] = CommandsStruct { "erase", &cmd_erase, &help_erase}; i++;
+    global_commands[i] = CommandsStruct { "rtcreg", &cmd_rtcreg, &help_rtcreg}; i++;
+    global_commands[i] = CommandsStruct { "DotStar", &cmd_DotStar, &help_DotStar}; i++;
+    global_commands[i] = CommandsStruct { "dump", &cmd_dump, &help_dump}; i++;
+    global_commands[i] = CommandsStruct { "sphoto", &cmd_sphoto, &help_sphoto}; i++;
+    global_commands[i] = CommandsStruct { "upload", &cmd_upload, &help_upload}; i++;
+    global_commands[i] = CommandsStruct { "io", &cmd_io, &help_io}; i++;
+    global_commands[i] = CommandsStruct { "ana", &cmd_ana, &help_ana}; i++;
+    global_commands[i] = CommandsStruct { "takeSphoto", &cmd_takeSphoto, &help_takeSphoto}; i++;
+    global_commands[i] = CommandsStruct { "stackandheap", &cmd_stackandheap, &help_stackandheap}; i++;
+    global_commands[i] = CommandsStruct { "initQueue", &cmd_initQueue, &help_initQueue}; i++;
+    global_commands[i] = CommandsStruct { "text", &cmd_text, &help_text}; i++;
+    global_commands[i] = CommandsStruct { "view", &cmd_view, &help_view}; i++;
+    global_commands[i] = CommandsStruct { "tdump", &cmd_tdump, &help_tdump}; i++;
+    global_commands[i] = CommandsStruct { "info", &cmd_info, &help_info}; i++;
+    global_commands[i] = CommandsStruct { "trtc", &cmd_trtc, &help_trtc}; i++;
+    global_commands[i] = CommandsStruct { "format", &cmd_format, &help_format}; i++;
+    global_commands[i] = CommandsStruct { "free", &cmd_free, &help_free}; i++;
+    global_commands[i] = CommandsStruct { "takeSpiphoto", &cmd_takeSpiphoto, &help_takeSpiphoto}; i++;
+    global_commands[i] = CommandsStruct { "framdump", &framdump, &help_framdump}; i++;
+    global_commands[i] = CommandsStruct { "initfram", &cmd_initfram, &help_initfram}; i++;
+    global_commands[i] = CommandsStruct { "framclear", &framclear, &help_framclear}; i++;
+    global_commands[i] = CommandsStruct { "SystemSetup", &SystemSetup, &help_SystemSetup}; i++;
+    global_commands[i] = CommandsStruct { "ReadSetup", &ReadSetup, &help_ReadSetup}; i++;
+    global_commands[i] = CommandsStruct { "listQue", &cmd_listQue, &help_listQue}; i++;
+    global_commands[i] = CommandsStruct { "enterTeamID", &cmd_enterTeamID, &help_enterTeamID}; i++;
+}
 
 //List of LED sub command names
 const char *led_args[] = {
@@ -421,12 +398,7 @@ const char *DotStar_args[] = {
   "Cyan",
   "White"
 };
-//
-//-------------------------------------------- for command line processor
-//
-int num_commands = sizeof(commands_str) / sizeof(char *);
-//
-//-------------------------------------------- end command line processor
+
 
 //-----------------------------------------------------------------
 //tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
@@ -803,14 +775,18 @@ void parse_line() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int execute() {
+  init_global_commands(); // make sure the global commands are initialized
+
   for (int i = 0; i < num_commands; i++) {
-    if (strcmp(args[0], commands_str[i]) == 0) {
-      return (*commands_func[i])();
+    if (strcmp(args[0], global_commands[i].name) == 0) {
+      return (*global_commands[i].command)();
       //Serial.print(args[0]);       //???????????????????????????????????????????????
     }
   }
 
-  Serial.println("Invalid command. Type \"?\" for more!!!.");
+  Serial.print("Invalid command: ");
+  Serial.print(args[0]);
+  Serial.print(". Type \"?\" for more!!!.");
   return 0;
 }
 
@@ -819,132 +795,36 @@ int execute() {
 int cmd_help() {
   if (args[1] == NULL) {
     help_help();
+    return 0;
   }
-  else if (strcmp(args[1], commands_str[0]) == 0) {
-    help_help();
+
+  // Make sure the commands are initilized
+  init_global_commands();
+
+  // Find the command that was triggered.
+  for (int i = 0; i < num_commands; i++)
+  {
+    if (strcmp(args[1], global_commands[i].name) == 0) {
+        global_commands[i].help();
+        return 0;
+    }
   }
-  else if (strcmp(args[1], commands_str[1]) == 0) {
-    help_led();
-  }
-  else if (strcmp(args[1], commands_str[2]) == 0) {
-    help_exit();
-  }
-  else if (strcmp(args[1], commands_str[3]) == 0) {
-    help_scani2c();
-  }
-  else if (strcmp(args[1], commands_str[4]) == 0) {
-    help_bme680();
-  }
-  else if (strcmp(args[1], commands_str[5]) == 0) {
-    help_time();
-  }
-  else if (strcmp(args[1], commands_str[6]) == 0) {
-    help_settime();
-  }
-  else if (strcmp(args[1], commands_str[7]) == 0) {
-    help_dir();
-  }
-  else if (strcmp(args[1], commands_str[8]) == 0) {
-    help_mkdir();
-  }
-  else if (strcmp(args[1], commands_str[9]) == 0) {
-    help_rmdir();
-  }
-  else if (strcmp(args[1], commands_str[10]) == 0) {
-    help_open();
-  }
-  else if (strcmp(args[1], commands_str[11]) == 0) {
-    help_erase();
-  }
-  else if (strcmp(args[1], commands_str[12]) == 0) {
-    help_rtcreg();
-  }
-  else if (strcmp(args[1], commands_str[13]) == 0) { //DotStar
-    help_DotStar();
-  }
-  else if (strcmp(args[1], commands_str[14]) == 0) { //dump
-    help_dump();
-  }
-  else if (strcmp(args[1], commands_str[15]) == 0) { //sphoto
-    help_sphoto();
-  }
-  else if (strcmp(args[1], commands_str[16]) == 0) { //upload
-    help_upload();
-  }
-  else if (strcmp(args[1], commands_str[17]) == 0) { //io
-    help_io();
-  }
-  else if (strcmp(args[1], commands_str[18]) == 0) { //ana
-    help_ana();
-  }
-  else if (strcmp(args[1], commands_str[19]) == 0) { //takeSphoto
-    help_takeSphoto();
-  }
-  else if (strcmp(args[1], commands_str[20]) == 0) { //stackandheap
-    help_stackandheap();
-  }
-  else if (strcmp(args[1], commands_str[21]) == 0) { //initQueue
-    help_initQueue();
-  }
-  else if (strcmp(args[1], commands_str[22]) == 0) { //text
-    help_text();
-  }
-  else if (strcmp(args[1], commands_str[23]) == 0) { //view
-    help_view();
-  }
-  else if (strcmp(args[1], commands_str[24]) == 0) { //tdump
-    help_tdump();
-  }
-  else if (strcmp(args[1], commands_str[25]) == 0) { //info
-    help_info();
-  }
-  else if (strcmp(args[1], commands_str[26]) == 0) { //trtc
-    help_trtc();
-  }
-  else if (strcmp(args[1], commands_str[27]) == 0) { //format
-    help_format();
-  }
-  else if (strcmp(args[1], commands_str[28]) == 0) { //free
-    help_free();
-  }
-  else if (strcmp(args[1], commands_str[29]) == 0) { //takeSpiphoto
-    help_takeSpiphoto();
-  }
-  else if (strcmp(args[1], commands_str[30]) == 0) { //framdump
-    help_framdump();
-  }
-  else if (strcmp(args[1], commands_str[31]) == 0) { //initfram
-    help_initfram();
-  }
-  else if (strcmp(args[1], commands_str[32]) == 0) { //framclear
-    help_framclear();
-  }
-  else if (strcmp(args[1], commands_str[33]) == 0) { //SystemSetup
-    help_SystemSetup();
-  }
-  else if (strcmp(args[1], commands_str[34]) == 0) { //ReadSetup
-    help_ReadSetup();
-  }
-  else if (strcmp(args[1], commands_str[35]) == 0) { //listQue
-    help_listQue();
-  }
-  else if (strcmp(args[1], commands_str[36]) == 0) { //enterTeamID
-    help_enterTeamID();
-  }
-  else {
-    help_help();
-  }
+
+  // no matches, return the basic help.global_commands
+  Serial.print("Could not find a help command for ");
+  Serial.println(args[1]);
+  help_help();
   return 0;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 void help_help() {
   char string_buffer[80];
-  Serial.println("The following commands are available:");
+  Serial.println("The following commands are available (they are not case sensitive):");
 
   for (uint16_t i = 0; i < num_commands; i++) {
 
-    snprintf(string_buffer, 80, "%-15s", commands_str[i]);
+    snprintf(string_buffer, 80, "%-15s", global_commands[i].name);
     Serial.print(string_buffer);
     
     if (i % 6 == 0) {
@@ -985,7 +865,7 @@ void help_scani2c() {
 }
 void  help_settime() {
   Serial.println("\nEnter \"settime YYMMDDHHMMSS\" where:");
-  Serial.println("  YY is year, MM is month, DD is day, HH is hour(24), MM is minute, SS is seconds");
+  Serial.println("  YY is years, MM is months, DD is days, HH is hours(24), MM is minutes, SS is seconds");
 }
 void help_bme680() {
   Serial.println("\nOutputs of temperature, humidity, pressure, and gas sensor readings");
@@ -1000,7 +880,7 @@ void help_mkdir() {
   Serial.println("\nTo make a directory or folder \"mkdir foldername\"");
 }
 void help_rmdir() {
-  Serial.println("\nRemoves a directory or folder \"rmdir foldernamd\"");
+  Serial.println("\nRemoves a directory or folder \"rmdir foldernam\"");
 }
 void help_open() {
   Serial.println("\nCreate a file within a folder/directory \"open filename\"");
@@ -1166,13 +1046,15 @@ int cmd_mkdir() {                                                               
 
 int cmd_rmdir() {
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
-  if (!SD.rmdir(args[1])) {
-    Serial.println("rmdir failed\n");
-    attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-    return 1;                                  //return with error
+  bool returnValue = 0;
+  if (!SD.rmdir(args[1])) {                                                     //make directory with 1st argument of input
+    Serial.print("Remove folder ");                                             //show could not create
+    Serial.print(args[1]);                                                      //show could not create
+    Serial.println(" failed");                                                  //show could not create
+    returnValue = 1;                                                            //return with error
   }
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-  return 0;                                   //return no error
+  return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
