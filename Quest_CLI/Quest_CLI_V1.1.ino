@@ -296,7 +296,7 @@ int takeSPI(void);      //-------------------------------------
 //
 /*
   ///////////////////////////////////////////////////////////////////////
-  //----------- for testing for timming with a logic analizer --------
+  //----------- for testing for timing with a logic analizer --------
   //    located in Quest_test.h
   //
   void Pulse13(void);    //pulse pin 13 / IO7 one cpu cycle time
@@ -321,53 +321,7 @@ int takeSPI(void);      //-------------------------------------
   //
 */
 //
-/*
-  //
-  //Function declarations
-  void cli_init();
-  int cmd_help();
-  int cmd_led();
-  int cmd_exit();
-  int cmd_scani2c();
-  int cmd_bme680();
-  int cmd_time();
-  int cmd_settime();
-  int cmd_dir();
-  int cmd_mkdir();
-  int cmd_rmdir();
-  int cmd_open();
-  int cmd_erase();
-  int cmd_rtcreg();
-  int cmd_DotStar();        //13
-  int cmd_dump();           //14
-  int cmd_sphoto();         //15
-  int cmd_upload();         //16
-  int cmd_io();             //17
-  int cmd_ana();            //18
-  int cmd_takeSphoto();         //19
-  int cmd_stackandheap();   //20
-  int cmd_ initQueue();         //21
-  int cmd_text();           //22
-  int cmd_view();           //23
-  int cmd_tdump();          //24
-  int cmd_tc();             //25  test mission clock
-  int cmd_trtc();           //26  test real time clock
-  int cmd_format();         //27  format SD
-  int cmd_free();           //28  free space on SD
-  int cmd_takeSpiphoto();         //29  for testing SPI Camera
-  int framdump();           //30  dump total contents of fram
-  int initfram();           //31  Default setup for Fram memory
-  int framclear();          //32  Set all of fram to "0"
-  int SystemSet();          //33
 
-  void setPCF85263();
-  void readPCF85263();
-  void help_led();
-  void help_exit();
-  void help_help();
-  void help_scani2c();
-  void help_settime();
-*/
 //List of functions pointers corresponding to each command
 int (*commands_func[])() {
   &cmd_help,
@@ -517,7 +471,7 @@ void logit(uint8_t  x) {
 void logit_string() {
   Logfile = SD.open(LOG_FILENAME, FILE_WRITE);                          //open syslog file
   if (!Logfile) {                                                       //can open the file
-    Serial.println("\r\nlogit_string error - coult not open file");     //error can not open log file
+    Serial.println("\r\nlogit_string error - could not open file");     //error can not open log file
     return;
   }
   
@@ -525,6 +479,7 @@ void logit_string() {
   delayMicroseconds(100);                                               //wait 100 microsec
   for (uint8_t x = 0x20; x < 128; x++) {                                //print a string to log file
     Logfile.write(x);                                                   //write one character at a time
+  }
   Logfile.close();                                                      //close the log file
 }
 //
@@ -1194,16 +1149,18 @@ int cmd_enterTeamID() {                      //Enter Team ID
   return 0;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-int cmd_mkdir() {                                 //Make a new directory of sub directory
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
-  FsDateTime::setCallback(dateTime);            //set time and date for file
-  if (!SD.mkdir(args[1])) {                     //make directory with 1st argument of input
-    Serial.println("Create Folder failed");     //show could not create
-    attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-    return 1;                                   //return with error
+int cmd_mkdir() {                                                               //Make a new directory of sub directory
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  FsDateTime::setCallback(dateTime);                                            //set time and date for file
+  bool returnValue = 0;
+  if (!SD.mkdir(args[1])) {                                                     //make directory with 1st argument of input
+    Serial.print("Create folder ");                                             //show could not create
+    Serial.print(args[1]);                                                      //show could not create
+    Serial.println(" failed");                                                  //show could not create
+    returnValue = 1;                                                            //return with error
   }
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-  return 0;                                     //return no error
+  return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
