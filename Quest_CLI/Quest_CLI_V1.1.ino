@@ -323,17 +323,25 @@ int takeSPI(void);      //-------------------------------------
 //
 
 // Define the function types
-typedef int (*Func_CMD) ();
-typedef void (*Func_HELP) ();
+typedef int (*Func_INT) ();
+typedef void (*Func_VOID) ();
 
 typedef struct {
     const char *name;
-    Func_CMD command;
-    Func_HELP help;
+    Func_INT command;
+    Func_VOID help;
 } CommandsStruct;
 
+typedef struct {
+    const char *name;
+    Func_VOID command;
+} DotStarColorStruct;
+
+#define num_dotstar_colors 8
+DotStarColorStruct global_dotstar_colors[num_dotstar_colors];
 #define num_commands 37
 CommandsStruct global_commands[num_commands];
+
 void init_global_commands() {
     int i = 0;
     global_commands[i] = CommandsStruct { "?", &cmd_help, &help_help }; i++;
@@ -374,6 +382,16 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "ReadSetup", &ReadSetup, &help_ReadSetup}; i++;
     global_commands[i] = CommandsStruct { "listQue", &cmd_listQue, &help_listQue}; i++;
     global_commands[i] = CommandsStruct { "enterTeamID", &cmd_enterTeamID, &help_enterTeamID}; i++;
+
+    i=0;
+    global_dotstar_colors[i] = DotStarColorStruct { "Blue", DotStarBlue }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Cyan", DotStarCyan }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Green", DotStarGreen }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Magenta", DotStarMagenta }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Off", DotStarOff }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Red", DotStarRed }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "White", DotStarWhite }; i++;
+    global_dotstar_colors[i] = DotStarColorStruct { "Yellow", DotStarYellow }; i++;
 }
 
 //List of LED sub command names
@@ -382,18 +400,6 @@ const char *led_args[] = {
   "off",
   "blink"
 };
-//List of DotStar sub command names
-const char *DotStar_args[] = {
-  "Off",
-  "Red",
-  "Green",
-  "Yellow",
-  "Blue",
-  "Magenta",
-  "Cyan",
-  "White"
-};
-
 
 //-----------------------------------------------------------------
 //tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
@@ -781,7 +787,7 @@ int execute() {
 
   Serial.print("Invalid command: ");
   Serial.print(args[0]);
-  Serial.print(". Type \"?\" for more!!!.");
+  Serial.println(". Type \"?\" for more!");
   return 0;
 }
 
@@ -836,15 +842,16 @@ void help_led() {
   Serial.println("    where \"hz\" is the blink frequency in Hz.");
 }
 void help_DotStar() {
-  Serial.println("Control the on-board DotStar LED");           //help for DotStar
+  Serial.println("Control the on-board DotStar LED");
+
   Serial.println("DotStar Off => Turn DotStar Off");
-  Serial.println("DotStar Red => Make DotStar Red");
-  Serial.println("DotStar Green => Make DotStar Green");
-  Serial.println("DotStar Yellow => Make DotStar Yellow");
   Serial.println("DotStar Blue => Make DotStar Blue");
-  Serial.println("DotStar Magenta => Make DotStar Magenta");
   Serial.println("DotStar Cyan => Make DotStar Cyan");
+  Serial.println("DotStar Green => Make DotStar Green");
+  Serial.println("DotStar Magenta => Make DotStar Magenta");
+  Serial.println("DotStar Red => Make DotStar Red");
   Serial.println("DotStar White => Make DotStar White");
+  Serial.println("DotStar Yellow => Make DotStar Yellow");
 }
 
 void help_exit() {
@@ -1114,34 +1121,15 @@ int cmd_led() {
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_DotStar() {
-  if (strcmp(args[1], DotStar_args[0]) == 0) {  //DotStar commands for color
-    DotStarOff();
+  for (int i = 0; i < num_dotstar_colors; i++) {
+    if (strcmp(args[1], global_dotstar_colors[i].name) == 0) {
+      global_dotstar_colors[i].command();
+      delay(DOTSTAR_DELAY);
+      return 0;
+    }
   }
-  else if (strcmp(args[1], DotStar_args[1]) == 0) {
-    DotStarRed();
-  }
-  else if (strcmp(args[1], DotStar_args[2]) == 0) {
-    DotStarGreen();
-  }
-  else if (strcmp(args[1], DotStar_args[3]) == 0) {
-    DotStarYellow();
-  }
-  else if (strcmp(args[1], DotStar_args[4]) == 0) {
-    DotStarBlue();
-  }
-  else if (strcmp(args[1], DotStar_args[5]) == 0) {
-    DotStarMagenta();
-  }
-  else if (strcmp(args[1], DotStar_args[6]) == 0) {
-    DotStarCyan();
-  }
-  else if (strcmp(args[1], DotStar_args[7]) == 0) {
-    DotStarWhite();
-  }
-  else {
-    Serial.println("unknown command");
-  }
-  delay(1500);
+
+  Serial.println("unknown command");
   return 0;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF

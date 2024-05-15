@@ -89,8 +89,6 @@ void read_line();
 void parse_line();
 int execute();
 int cmd_help();
-void help_help();
-void help_led();
 void help_DotStar();
 void help_exit();
 void help_scani2c();
@@ -173,5 +171,6 @@ uint8_t Getchar();
 int ReadSetup();
 
 #define LOG_FILENAME "syslog.txt"
+#define DOTSTAR_DELAY 1500
 
 #endif
