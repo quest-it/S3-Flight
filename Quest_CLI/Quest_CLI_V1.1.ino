@@ -678,19 +678,30 @@ void cli_init() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 void my_cli() {
+  static bool first_run = true;
   cli_init();
   while (testing == true) {
     //     stackandheap();             //output stack and heap
+
     Serial.print("=>");
     read_line();
-    //      Serial.println();   //
-    if (!error_flag) {
 
+    // Skip the error on the first execution.
+    if (first_run) {
+      first_run = false;
+      if (line[0] == ' ') {
+        continue;
+      }
+    }
+
+    if (!error_flag) {
       parse_line();
     }
+
     if (!error_flag) {
       execute();
     }
+
     memset(line, 0, LINE_BUF_SIZE);
     memset(args, 0, sizeof(args[0][0]) * MAX_NUM_ARGS * ARG_BUF_SIZE);
     error_flag = false;
@@ -794,7 +805,7 @@ int execute() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int cmd_help() {
-  if (args[1] == NULL) {
+  if (args[1][0] == '\0') {
     help_help();
     return 0;
   }
@@ -809,8 +820,7 @@ int cmd_help() {
   }
 
   // no matches, return the basic help.global_commands
-  Serial.print("Could not find a help command for ");
-  Serial.println(args[1]);
+  Serial.printf("Could not find a help command for '%s'\n", args[1]);
   help_help();
   return 0;
 }
