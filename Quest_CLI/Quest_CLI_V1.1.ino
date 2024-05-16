@@ -828,7 +828,7 @@ int cmd_help() {
 
 void help_help() {
   char string_buffer[80];
-  Serial.println("The following commands are available (they are not case sensitive):");
+  Serial.println("The following commands are available:");
 
   for (uint16_t i = 0; i < num_commands; i++) {
 
@@ -843,9 +843,7 @@ void help_help() {
 }
 
 void help_led() {
-  Serial.print("Control the on-board LED, either on, off or blinking ");  //help for led
-  Serial.print(blink_cycles);
-  Serial.println(" times:");
+  Serial.printf("Control the on-board LED, either on, off or blinking %d times:\n", blink_cycles);  //help for led
   Serial.println("  led on");
   Serial.println("  led off");
   Serial.println("  led blink hz");
