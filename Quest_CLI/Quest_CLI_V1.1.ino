@@ -48,7 +48,7 @@
  * *****************************************************************************
 */
 //
-char Qversion [] = "CLI_V1.1";  //Program version
+char Qversion[] = "CLI_V1.1";  //Program version
 const char compile_date[] = __DATE__ " " __TIME__;
 const char source_file[] = __FILE__;
 //
@@ -625,16 +625,15 @@ void setup() {
 //
 void loop() {
 
-  Serial.print("\nSystem Boot Version ");
-  Serial.println(Qversion);
-  Serial.print("Compiled Date => "); Serial.println(compile_date);
-  Serial.print("Source file => "); Serial.println(source_file);
-  Serial.println();
-  Serial.print("Free Memory = "); Serial.print(freeMemory(), HEX);
-  Serial.print(" HEX or "); Serial.print(freeMemory()); Serial.println(" DEC");
-  //
+  Serial.printf("\nSystem Boot Version %s\n", Qversion);
+  Serial.printf("Compiled Date => %s\n", compile_date);
+  Serial.printf("Source file => %s\n\n", source_file);
+
+  int freeMemoryValue = freeMemory();
+  Serial.printf("Free Memory = %X HEX or %d DEC\n", freeMemoryValue, freeMemoryValue);
+
   Serial.println("\r\n\nInput 'T' to enter test within 15 seconds");
-  //
+
   uint32_t currentMillis = millis();          //this is time now
   uint16_t countdown = 15;                    //tet countdown clock
   long unsigned int milliscountdown = millis();       //countdown counter for test
@@ -646,7 +645,7 @@ void loop() {
   while ((millis() - currentMillis) < testtimeout) {
     if (Serial.available()) {
       char inbyte = Serial.read();              //get the input character
-      if (inbyte == 'T') {                      //if it is a T go to testing
+      if (inbyte == 'T' || inbyte == 't') {     //if it is a T go to testing
         testing = true;                         //set testing flag to true
         my_cli();                               //execute test command line processor
         SoftwareReset();
@@ -655,7 +654,7 @@ void loop() {
     if(millis() - milliscountdown > 1000){      //count every second in waiting for test
         milliscountdown = millis();
         countdown--;                            //decrease count for test
-        Serial.print("Enter 'T' for test else enter flying  Wait time = "); Serial.print(countdown); Serial.print("   version = ");Serial.println(Qversion);
+        Serial.printf("Enter 'T' of 't' for test else enter flying (%2d)   version = ", countdown); Serial.println(Qversion);
     }
   }
   if (testing == true) {
@@ -1165,6 +1164,14 @@ int read_bme680() {
     Serial.println("Failed to perform reading :(");
     return -1;
   }
+
+//   char  text_Atemp[]    = "Ambient Temperature = xx.xx C xxx.xx F";
+//   char  text_humidity[] = "Ambient Humidity = xx.xx %";
+//   char  text_gas[]      = "Gas = xxx.xx Kohms";
+//   char  text_pressure[] = "Pressure = xxxx.xx hPa";
+//   char  text_altitude[] = "Pressure Altitude = 12345.67 meters";
+
+
   int i = (bme.temperature * 1000);          //place temperature in text output buffer
   int C = i / 10;                               // save for f temp
   text_Atemp[22] = (i / 10000) + '0';
@@ -1259,26 +1266,11 @@ int read_bme680() {
 int cmd_bme680() {
   read_bme680();
 
-  Serial.print("Temperature = ");
-  Serial.print(bme.temperature);
-  Serial.println(" *C");
-
-  Serial.print("Pressure = ");
-  Serial.print(bme.pressure / 100.0);
-  Serial.println(" hPa");
-
-  Serial.print("Humidity = ");
-  Serial.print(bme.humidity);
-  Serial.println(" %");
-
-  Serial.print("Gas = ");
-  Serial.print(bme.gas_resistance / 1000.0);
-  Serial.println(" KOhms");
-
-  Serial.print("Approx. Altitude = ");
-  Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.println(" m");
-  Serial.println();
+  Serial.printf("Temperature = %.2f *C\r\n", bme.temperature);
+  Serial.printf("Pressure = %.2f hPa\r\n", bme.pressure / 100.0);
+  Serial.printf("Humidity = %.2f %%\r\n", bme.humidity);
+  Serial.printf("Gas = %.2f KOhms\r\n", bme.gas_resistance / 1000.0);
+  Serial.printf("Approximate Altitude = %.2f m\r\n", bme.readAltitude(SEALEVELPRESSURE_HPA));
 
   return 0;
 }
