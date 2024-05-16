@@ -1704,19 +1704,16 @@ int cmd_ana() {                      //command to upload a file to the Host use 
 //
 int cmd_takeSphoto() {        //19 - take a serial photo get a file name then place it in the Host Queue
   Serial.println("cmd_takeSphoto()");
-  //
-  Serial.print("P0Maddress = ");                //testing out put
-  Serial.println(readintFromfram(PCSaddress));
-  Serial.print("Serial photo ID = ");
-  Serial.println((char)readbyteFromfram(ID));           //Team ID Letter
-  //
+
+  Serial.printf("P0Maddress = %d\nSerial photo ID = %c", readintFromfram(PCSaddress), (char)readbyteFromfram(ID));
+
   int x = (readintFromfram(PCSaddress));    //get next serial photo name
   x++;
   if (x > 99999) {
     x = 0;
   };
   writeintfram(x, PCSaddress);              //inc and write for next time
-  //
+
   itoa(x, ascii, 10);                      //convert PCM photo count x to ascii string
   int z = 0;                               //to count number of valid entries in array
   for (int i = 0; ascii[i] != '\0'; i++) {
@@ -1738,9 +1735,9 @@ int cmd_takeSphoto() {        //19 - take a serial photo get a file name then pl
   for (int x = 0; x < 7; x++) { //move number of chartors
     args[1][x] = filenameS[x]; //move the filenameS into args[1]
   }
-  //
+
   Serial.println (args[1]);          //output the file name part of the header no extension
-  //
+
   cmd_sphoto();                     //take the serial photo and store it on SD with the args[1].jpg name
   //
   //  now take SD file and send to to Queue
@@ -1764,8 +1761,6 @@ int cmd_takeSphoto() {        //19 - take a serial photo get a file name then pl
 //      Enter without args[1] set will assign VUXXXXX file name with x being count up
 //
 int cmd_view() {
-
-  //
   if (strlen(args[1]) == 0) {         //if no file name given, give it VU perfix for view file
     itoa(photonumber, PN, 10);       //Place counting up int photonumber into the PN char array
     photonumber++;                    // inc to next number
@@ -1791,24 +1786,21 @@ int cmd_view() {
   Serial.print(writtenPictureSize / 256, HEX);    // output
   Serial.print(writtenPictureSize % 256, HEX);    //output
 
-  if (dataFile) {
-    int i = 0;
-    while (dataFile.available()) {      //data still in file
-      if (i % 32 == 0) {                //formatting for each line
-        Serial.println();               //send 32 char per line
-      }
-      uint8_t x = dataFile.read();      //get the data from file
-      if (x < 16) {
-        Serial.print("0"); //leading "0" on data
-      }
-      Serial.print(x, HEX);             //print it in hex to terminal
-      i++;                              // to next data to form 16 colums
-    }
-    dataFile.close();                   //close the data file
-  }
-  else {
+  if (!dataFile) {
     Serial.println("error opening file");
+    return 1;
   }
+
+  int i = 0;
+  while (dataFile.available()) {      //data still in file
+    if (i % 32 == 0) {                //formatting for each line
+      Serial.println();               //send 32 char per line
+    }
+    uint8_t x = dataFile.read();      //get the data from file
+    Serial.printf("%2X", x);
+    i++;                              // to next data to form 16 colums
+  }
+  dataFile.close();                   //close the data file
 
   Serial.println();
   //  Serial.println(writtenPictureSize, HEX);
