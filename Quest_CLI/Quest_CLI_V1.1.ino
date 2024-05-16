@@ -1451,38 +1451,22 @@ int cmd_rtcreg() {            //read status Ram byte from RTC
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int cmd_dump() {                          //Download SD file in HEX
-
   File dataFile = SD.open(args[1]);
-  if (dataFile) {
-    int i = 0;
-    while (dataFile.available()) {
-      if (i % 16 == 0) {                //formatting for each line
-        Serial.println();
-        if (i < 0x0F) {
-          Serial.print("0"); //leading "0" formatting for line address
-        }
-        if (i < 0xFF) {
-          Serial.print("0");
-        }
-        if (i < 0xFFF) {
-          Serial.print("0");
-        }
-        Serial.print(i, HEX);           //Hex address of line
-        Serial.print("  ");             //spacer between address and data
-      }
-      uint8_t x = dataFile.read();
-      if (x < 16) {
-        Serial.print("0"); //leading "0" on data
-      }
-      Serial.print(x, HEX);             //print it
-      Serial.print(" ");                //space between data
-      i++;                              // to next data to form 16 colums
-    }
-    dataFile.close();                   //close the data file
-  }
-  else {
+  if (!dataFile) {
     Serial.println("error opening file");
+    return 1;
   }
+
+  int i = 0;
+  while (dataFile.available()) {
+    if (i % 16 == 0) {                // put a header on this line with the address
+      Serial.printf("\n%04X  ", i);
+    }
+    uint8_t x = dataFile.read();
+    Serial.printf("%02X ", x);        // print the data
+    i++;                              // to next data to form 16 colums
+  }
+  dataFile.close();                   //close the data file
   Serial.println();
   return 0;
 }
