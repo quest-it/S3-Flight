@@ -1481,7 +1481,6 @@ void getPicture_callback(uint32_t pictureSize, uint16_t packetSize, uint32_t pac
   {
     photoFile.flush();
     photoFile.close();
-    //    Serial.println("SUCCESS");
   }
 }
 //
@@ -1557,16 +1556,16 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
 
   return 1;
 }
+
 void CameraCleanReturn() {                              //Clean up Camera setup to return
   digitalWrite(Cam_power, Cam_power_OFF);         //Serial and SPI camera power OFF
   digitalWrite(Sel0, LOW);                          //LOW on select to connect to Host
   IRQreference = millis();                          //capture millis for next time, start of interrupt
-  //
+
   Bank0size = writtenPictureSize;     //save the size for later
-  //
+
   Serial.print("\n\rphotosize = "); Serial.println(Bank0size, HEX);
   Serial.print("filename is = "); Serial.println(args[1]);
-  //
 
   WriteText();
 
@@ -1577,11 +1576,10 @@ void CameraCleanReturn() {                              //Clean up Camera setup 
   filenameS[8] = (writtenPictureSize / 256);
   filenameS[9] = (writtenPictureSize % 256);
   filenameS[10] = '\0';
-  //
-  addFileToQueue(filenameS);    //, writtenPictureSize);
-  //
+
+  addFileToQueue(filenameS);
   Serial.println(filenameS);
-  //
+
   EIC->INTFLAG.reg = EIC_INTFLAG_EXTINT(0);     //reset the IRQ Flag
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);
 }
@@ -1608,32 +1606,33 @@ void  WriteText(void) {
     Serial.println("erasing existing TextFile");            //say it
   }
 
-
   TextFile = SD.open(args[1], FILE_WRITE);             //Open to write file named TextFile
   TextFile.seek(0);                                    //Point to first entry in file
-  if (TextFile) {                                      //if can open good
-    //                                                 //file can open now write stock text
-    for (int y = 0; y < 14; y++) {                    //buffer to SD file .txt
-      TextFile.println(*(textlist + y));              //write to file lines pointed to by list
-    }                                                 //full stock Text file completed here
-    TextFile.println("----------------------------------------\n\r");  //spacer between text blocks
-    //
-    //  Now add User buffer at end of text file
-    //
-    strcat(user_text_buf0, ("\n\r** END **"));          // note end of text file
-    //            strcat(user_text_buf0,(NULL));                    //set end of text marker
-    for (int x = 0; x < strlen(user_text_buf0); x++) {  //Look at user text buffer
-      TextFile.write(user_text_buf0[x]);            //write the data in the text buffer to SD
-    }
-    //
-    TextFile.flush();                                 //clear SD file buffer
-    TextFile.close();                                 //close the file here
-    //
-    // Clear the buffer
-    user_text_buf0[0] = '\0';
-    //         memset(user_text_buf0, 0x00, sizeof(user_text_buf0));                             //clear the user buffer
-    //
+  if (!TextFile) {
+    return;
   }
+
+  //                                                 //file can open now write stock text
+  for (int y = 0; y < 14; y++) {                    //buffer to SD file .txt
+    TextFile.println(*(textlist + y));              //write to file lines pointed to by list
+  }                                                 //full stock Text file completed here
+  TextFile.println("----------------------------------------\n\r");  //spacer between text blocks
+  //
+  //  Now add User buffer at end of text file
+  //
+  strcat(user_text_buf0, ("\n\r** END **"));          // note end of text file
+  //            strcat(user_text_buf0,(NULL));                    //set end of text marker
+  for (int x = 0; x < strlen(user_text_buf0); x++) {  //Look at user text buffer
+    TextFile.write(user_text_buf0[x]);            //write the data in the text buffer to SD
+  }
+  //
+  TextFile.flush();                                 //clear SD file buffer
+  TextFile.close();                                 //close the file here
+  //
+  // Clear the buffer
+  user_text_buf0[0] = '\0';
+  //         memset(user_text_buf0, 0x00, sizeof(user_text_buf0));                             //clear the user buffer
+  //
   //            Pulse11high(); //testing
 
 
@@ -1659,55 +1658,42 @@ int cmd_upload() {                      //command to upload a file to the Host u
 const int IO[] = {A6, 3, 4, 9, 10, 11, 12, 13};
 
 int cmd_io() {                      //command to upload a file to the Host use SD for now.
-
-
   int x = atoi(args[1]);
   if (x < 0 || x > 7) {
     Serial.println("input only 0 to 7");
     return 0;
   }
-  Serial.println(IO[x]);
 
   int y = (IO[x]);
-  Serial.println(y);
+  Serial.printf("Current value is: %d", y);
 
-  //
-  char* cp = (args[2]);             //make cp point to beginneing args[2]
+  char* cp = (args[2]);             //make cp point to beginning args[2]
   char z = *cp;                     //z is the value at pointer
   if (z == 'H') {
-    Serial.println("was a H");
+    Serial.println("setting to H");
     digitalWrite(y, HIGH);
-    return 0;
   }
-  if (z == 'L') {
-    Serial.println("was a L");
+  else if (z == 'L') {
+    Serial.println("setting to L");
     digitalWrite(y, LOW);
-    return 0;
   }
   else {
-    Serial.println("input only H or L accepted");
+    Serial.println("input only H or L for high or low respectively");
     return 1;
   }
 
+  return 0;
 }
 
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_ana() {                      //command to upload a file to the Host use SD for now.
-  Serial.println("ana command");
+  Serial.println("cmd_ana()");
 
-  int sensorValue = analogRead(A0);   //read the digital value of the input
-  float voltage = sensorValue * (3.3 / 1023);
-  Serial.print("A0 = "); Serial.print(voltage); Serial.print("  ");
-  sensorValue = analogRead(A1);   //read the digital value of the input
-  voltage = sensorValue * (3.3 / 1023);
-  Serial.print("A1 = "); Serial.print(voltage); Serial.print("  ");
-  sensorValue = analogRead(A2);   //read the digital value of the input
-  voltage = sensorValue * (3.3 / 1023);
-  Serial.print("A2 = "); Serial.print(voltage); Serial.print("  ");
-  sensorValue = analogRead(A3);   //read the digital value of the input
-  voltage = sensorValue * (3.3 / 1023);
-  Serial.print("A3 = "); Serial.print(voltage); Serial.println("  ");
+  Serial.printf("A0 = %.2f  ",   analogRead(A0) * (3.3 / 1023));
+  Serial.printf("A1 = %.2f  ",   analogRead(A1) * (3.3 / 1023));
+  Serial.printf("A2 = %.2f  ",   analogRead(A2) * (3.3 / 1023));
+  Serial.printf("A3 = %.2f  \n", analogRead(A3) * (3.3 / 1023));
   return 1;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
