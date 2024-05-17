@@ -562,53 +562,47 @@ void setup() {
   //
   //---  Default pin defination and direction
   //
-  pinMode(LEDpin, OUTPUT);                    //IO7 and RED LED on PCB
-  pinMode(B_MicroSD_CS, OUTPUT);              //MicroSD enable pin
-  digitalWrite(B_MicroSD_CS, HIGH);           //MicroSD pin Disable
-  pinMode(Cam_power, OUTPUT);                 //Serial and SPI camera power pin
-  digitalWrite(Cam_power, Cam_power_OFF);     //Serial and SPI camera power off
+  pinMode(LEDpin, OUTPUT);                          // IO7 and RED LED on PCB
+  pinMode(B_MicroSD_CS, OUTPUT);                    // MicroSD enable pin
+  digitalWrite(B_MicroSD_CS, HIGH);                 // MicroSD pin Disable
+  pinMode(Cam_power, OUTPUT);                       // Serial and SPI camera power pin
+  digitalWrite(Cam_power, Cam_power_OFF);           // Serial and SPI camera power off
 
-  pinMode(Sel0, OUTPUT);                      //Selection serial camera or serial from host
-  digitalWrite(Sel0, LOW);                    //default low connect serial to host
+  pinMode(Sel0, OUTPUT);                            // Selection serial camera or serial from host
+  digitalWrite(Sel0, LOW);                          // default low connect serial to host
 
-  pinMode (SPI_cam_CS, OUTPUT);                   //set spicamera CS pin. output
+  pinMode (SPI_cam_CS, OUTPUT);                     // set spicamera CS pin. output
   digitalWrite(SPI_cam_CS, HIGH);
-  //SPI_cam_Power = 7;                            //SPI camera power pin
-  const int SPIcamON = 1;                         //Power on the SPI camera    Removed for test of quest init 0503
-  const int SPIcamOFF = 0;                        //Power off the SPI camera
-  pinMode( SPIcamHold, INPUT);                    //SPI camera Hold pin
+  // SPI_cam_Power = 7;                             // SPI camera power pin
+  const int SPIcamON = 1;                           // Power on the SPI camera    Removed for test of quest init 0503
+  const int SPIcamOFF = 0;                          // Power off the SPI camera
+  pinMode( SPIcamHold, INPUT);                      // SPI camera Hold pin
 
-
-
-  pinMode(softuartoutpin, OUTPUT);            //for Host interface
-  digitalWrite(softuartoutpin, HIGH);         //for Host interface
-  DotStarInit();                              //set up DotStar
-  DotStarOff();                               //Set to Off
+  pinMode(softuartoutpin, OUTPUT);                  // for Host interface
+  digitalWrite(softuartoutpin, HIGH);               // for Host interface
+  DotStarInit();                                    // set up DotStar
+  DotStarOff();                                     // Set to Off
   Serial.println("DotStar OK");
   //
-  //---Set RTC quartz oscillator for proper load capacitance
+  // ---Set RTC quartz oscillator for proper load capacitance
   Wire.begin();
   Wire.beginTransmission(PCF85263address);
-  Wire.write(byte (0x25));                            //Osc Register
-  Wire.write(byte (0x03));                            //Set to 12.5pf
-  Wire.endTransmission();                             //end xmission
+  Wire.write(byte (0x25));                          // Osc Register
+  Wire.write(byte (0x03));                          // Set to 12.5pf
+  Wire.endTransmission();                           // end xmission
   Serial.println("RTC xyal set");
   //
   //
-  // initfram();                                 //check FRAM ??
-  Serial.println("FRAM Inited");                //CLI_24
-  //
+  // initfram();                                    // check FRAM ??
+  //   Serial.println("FRAM Inited");                    // CLI_24  //
   //
   //---  Wake up SD card
-  if (!SD.begin(B_MicroSD_CS))
+  while (!SD.begin(B_MicroSD_CS))
   {
-    Serial.println("SD not present or initialization failed");
-    while (!SD.begin(B_MicroSD_CS)) {
-      Serial.println("Please install SD card");
-      delay(2000);
-    }
+    Serial.println("SD card not present or initialization failed\nPlease install SD card.\n");
+    delay(2000);
   }
-  Serial.println("SD installed OK");
+  Serial.println("SD card session OK");
   initSD();                             //set up SD files and system files for operation
   //
   //----------------------------------------------------------------------
