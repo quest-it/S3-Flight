@@ -34,6 +34,8 @@ int cmd_led();
 int cmd_listQue();
 int cmd_mkdir();
 int cmd_open();
+int cmd_queue_init();
+int cmd_queue_list();
 int cmd_rmdir();
 int cmd_rtcreg();
 int cmd_sphoto();

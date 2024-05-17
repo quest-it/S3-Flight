@@ -270,7 +270,8 @@ void help_io();
 void help_upload();
 void help_takeSphoto();
 void help_stackandheap();
-void help_initQueue();
+void help_queue_init();
+void help_queue_list();
 void help_text();
 void help_view();
 void help_tdump();
@@ -366,7 +367,8 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "analog", &cmd_analog, &help_analog}; i++;
     global_commands[i] = CommandsStruct { "takeSphoto", &cmd_takeSphoto, &help_takeSphoto}; i++;
     global_commands[i] = CommandsStruct { "stackandheap", &cmd_stackandheap, &help_stackandheap}; i++;
-    global_commands[i] = CommandsStruct { "initQueue", &cmd_initQueue, &help_initQueue}; i++;
+    global_commands[i] = CommandsStruct { "queue_init", &cmd_queue_init, &help_queue_init}; i++;
+    global_commands[i] = CommandsStruct { "queue_list", &cmd_queue_list, &help_queue_list}; i++;
     global_commands[i] = CommandsStruct { "text", &cmd_text, &help_text}; i++;
     global_commands[i] = CommandsStruct { "view", &cmd_view, &help_view}; i++;
     global_commands[i] = CommandsStruct { "tdump", &cmd_tdump, &help_tdump}; i++;
@@ -380,7 +382,6 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "fram_clear", &cmd_fram_clear, &help_fram_clear}; i++;
     global_commands[i] = CommandsStruct { "SystemSetup", &SystemSetup, &help_SystemSetup}; i++;
     global_commands[i] = CommandsStruct { "ReadSetup", &ReadSetup, &help_ReadSetup}; i++;
-    global_commands[i] = CommandsStruct { "listQue", &cmd_listQue, &help_listQue}; i++;
     global_commands[i] = CommandsStruct { "enterTeamID", &cmd_enterTeamID, &help_enterTeamID}; i++;
 
     i=0;
@@ -949,7 +950,7 @@ void help_stackandheap() {
   Serial.println("will printout both stack pointer ahd heap pointer ");
 }
 
-void help_initQueue() {
+void help_queue_init() {
   Serial.println("Setup the Photo Queue's space and pointers");
   Serial.println("Set to empty Queue");
 }
@@ -1019,7 +1020,7 @@ void help_ReadSetup() {
   Serial.println("Comming Soon");
 }
 
-void help_listQue() {
+void help_queue_list() {
   Serial.println("Will list all the photo files in the Queue waiting");
   Serial.println("to be sent the the Host");
 }
@@ -2859,22 +2860,29 @@ int cmd_initfram() {
 //
 //char testque[
 //
-int cmd_initQueue() {
+int cmd_queue_init() {
   InitQue();
   addFileToQueue("xx00000.jpgxx");
   addFileToQueue("xx00000.jpgxx");
   addFileToQueue(args[1]);
   addFileToQueue(filenameS);
 
-
   return 0;
-
 }
-//
-int cmd_listQue() {
+
+int cmd_initQueue() {
+  return cmd_queue_init();
+}
+
+int cmd_queue_list() {
   listQue();
   return 0;
 }
+
+int cmd_listQue() {
+  return cmd_queue_list();
+}
+
 //
 //  check Queue to see if a file is ready to send to Host
 //
