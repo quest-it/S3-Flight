@@ -265,7 +265,7 @@ uint16_t Tdiff = 0;                     //Mission time different
 //-----------------------function prototypes
 void listQue();
 
-void help_ana();
+void help_analog();
 void help_io();
 void help_upload();
 void help_takeSphoto();
@@ -363,7 +363,7 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "sphoto", &cmd_sphoto, &help_sphoto}; i++;
     global_commands[i] = CommandsStruct { "upload", &cmd_upload, &help_upload}; i++;
     global_commands[i] = CommandsStruct { "io", &cmd_io, &help_io}; i++;
-    global_commands[i] = CommandsStruct { "ana", &cmd_ana, &help_ana}; i++;
+    global_commands[i] = CommandsStruct { "analog", &cmd_analog, &help_analog}; i++;
     global_commands[i] = CommandsStruct { "takeSphoto", &cmd_takeSphoto, &help_takeSphoto}; i++;
     global_commands[i] = CommandsStruct { "stackandheap", &cmd_stackandheap, &help_stackandheap}; i++;
     global_commands[i] = CommandsStruct { "initQueue", &cmd_initQueue, &help_initQueue}; i++;
@@ -375,9 +375,9 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "format", &cmd_format, &help_format}; i++;
     global_commands[i] = CommandsStruct { "free", &cmd_free, &help_free}; i++;
     global_commands[i] = CommandsStruct { "takeSpiphoto", &cmd_takeSpiphoto, &help_takeSpiphoto}; i++;
-    global_commands[i] = CommandsStruct { "framdump", &framdump, &help_framdump}; i++;
-    global_commands[i] = CommandsStruct { "initfram", &cmd_initfram, &help_initfram}; i++;
-    global_commands[i] = CommandsStruct { "framclear", &framclear, &help_framclear}; i++;
+    global_commands[i] = CommandsStruct { "fram_dump", &framdump, &help_fram_dump}; i++;
+    global_commands[i] = CommandsStruct { "fram_init", &cmd_fram_init, &help_fram_init}; i++;
+    global_commands[i] = CommandsStruct { "fram_clear", &framclear, &help_fram_clear}; i++;
     global_commands[i] = CommandsStruct { "SystemSetup", &SystemSetup, &help_SystemSetup}; i++;
     global_commands[i] = CommandsStruct { "ReadSetup", &ReadSetup, &help_ReadSetup}; i++;
     global_commands[i] = CommandsStruct { "listQue", &cmd_listQue, &help_listQue}; i++;
@@ -926,9 +926,9 @@ void help_io() {
   Serial.println("\"Example =>io 7 L\"  will cause IO7 to go Low");
 }
 
-void help_ana() {
+void help_analog() {
   Serial.println("Sample A0 through A3 analog input");
-  Serial.println("print the voltage values on earch input");
+  Serial.println("print the voltage values on each input");
 }
 
 void help_takeSphoto() {
@@ -987,21 +987,21 @@ void help_takeSpiphoto() {
   Serial.println("the Host on the next request from Host");
 }
 
-void help_framdump() {
+void help_fram_dump() {
   Serial.println("Will send to the terminal the first- 512 bytes of fram");
   Serial.println("memory space, this is where all non volatile variables");
   Serial.println("are stored"); 
 }
 
-void help_initfram() {
+void help_fram_init() {
   Serial.println("this will clear, set to 0, all photo counters,");
   Serial.println("reset number counter, and the mission clock");
   Serial.println("this should be executed before FLIGHT operations");
 }
 
-void help_framclear() {
+void help_fram_clear() {
   Serial.println("This will clear all of fram to zero, for the fram");
-  Serial.println("to be set up for flight a initfram must be performed");
+  Serial.println("to be set up for flight a fram_init must be performed");
 }
 
 void help_SystemSetup() {
@@ -1046,7 +1046,7 @@ int cmd_tdump() {                       //Download SD file in ASCII
   Serial.println();
   return 0;
 }
-//FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
 int cmd_dir() {                           //list the SD card directory of files
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
   SD.ls(LS_DATE | LS_SIZE | LS_R);      //list directory command
@@ -1054,7 +1054,7 @@ int cmd_dir() {                           //list the SD card directory of files
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
   return 0;                               //return no error
 }
-//FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
 int cmd_enterTeamID() {                      //Enter Team ID
   char x = args[1][0];
   writebytefram(x, ID);
@@ -1719,13 +1719,18 @@ int cmd_io() {                      //command to upload a file to the Host use S
 
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-int cmd_ana() {                      //command to upload a file to the Host use SD for now.
+int cmd_analog() {
   Serial.printf("A0 = %.2f  ",   analogRead(A0) * (3.3 / 1023));
   Serial.printf("A1 = %.2f  ",   analogRead(A1) * (3.3 / 1023));
   Serial.printf("A2 = %.2f  ",   analogRead(A2) * (3.3 / 1023));
   Serial.printf("A3 = %.2f  \n", analogRead(A3) * (3.3 / 1023));
   return 1;
 }
+
+int cmd_ana() {
+  return cmd_analog();
+}
+
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 // first take a photo and put on SD for now... need to put in buffer for speed later
 //----------  real photo and header here ------------------------
@@ -2824,13 +2829,17 @@ int takeSPI() {
 //****************************************************************************************
 //
 //
-int cmd_initfram() {        //to reset all counter in fram to proper values
+int cmd_fram_init() {        //to reset all counter in fram to proper values
   initfram();
   DateTime now = rtc.now();                   //get time now
   currentunix = (now.unixtime());             //get current unix time, don't count time not flying
   writelongfram(currentunix, PreviousUnix);   //set fram Mission time start now
   writelongfram(0, CumUnix);                  //set cumulitive to 0
   return 0;
+}
+
+int cmd_initfram() {
+  return cmd_fram_init();
 }
 //
 //
