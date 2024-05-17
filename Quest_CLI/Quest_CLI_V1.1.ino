@@ -375,9 +375,9 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "format", &cmd_format, &help_format}; i++;
     global_commands[i] = CommandsStruct { "free", &cmd_free, &help_free}; i++;
     global_commands[i] = CommandsStruct { "takeSpiphoto", &cmd_takeSpiphoto, &help_takeSpiphoto}; i++;
-    global_commands[i] = CommandsStruct { "fram_dump", &framdump, &help_fram_dump}; i++;
+    global_commands[i] = CommandsStruct { "fram_dump", &cmd_fram_dump, &help_fram_dump}; i++;
     global_commands[i] = CommandsStruct { "fram_init", &cmd_fram_init, &help_fram_init}; i++;
-    global_commands[i] = CommandsStruct { "fram_clear", &framclear, &help_fram_clear}; i++;
+    global_commands[i] = CommandsStruct { "fram_clear", &cmd_fram_clear, &help_fram_clear}; i++;
     global_commands[i] = CommandsStruct { "SystemSetup", &SystemSetup, &help_SystemSetup}; i++;
     global_commands[i] = CommandsStruct { "ReadSetup", &ReadSetup, &help_ReadSetup}; i++;
     global_commands[i] = CommandsStruct { "listQue", &cmd_listQue, &help_listQue}; i++;
@@ -798,6 +798,13 @@ int execute() {
 }
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+int cmd_fram_clear() {
+  return framclear();
+}
+
+int cmd_fram_dump() {
+  return framdump();
+}
 
 int cmd_help() {
   if (args[1][0] == '\0') {
