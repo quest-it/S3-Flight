@@ -351,7 +351,7 @@ void init_global_commands() {
     global_commands[i] = CommandsStruct { "scani2c", &cmd_scani2c, &help_scani2c}; i++;
     global_commands[i] = CommandsStruct { "bme680", &cmd_bme680, &help_bme680}; i++;
     global_commands[i] = CommandsStruct { "time", &cmd_time, &help_time}; i++;
-    global_commands[i] = CommandsStruct { "settime", &cmd_settime, &help_settime}; i++;
+    global_commands[i] = CommandsStruct { "time_set", &cmd_time_set, &help_time_set}; i++;
     global_commands[i] = CommandsStruct { "dir", &cmd_dir, &help_dir}; i++;
     global_commands[i] = CommandsStruct { "mkdir", &cmd_mkdir, &help_mkdir}; i++;
     global_commands[i] = CommandsStruct { "rmdir", &cmd_rmdir, &help_rmdir}; i++;
@@ -862,76 +862,96 @@ void help_exit() {
   Serial.println("Then enter a 'T' within 15 seconds to enter Test of the CLI interface again");
   Serial.println("or do nothing and the program will automatically enter flight Mode"); 
 }
+
 void help_scani2c() {
   Serial.println("Will scan I2C addresses and indicate which address is alive");
 }
-void  help_settime() {
-  Serial.println("\nEnter \"settime YYMMDDHHMMSS\" where:");
+
+void help_time() {
+  Serial.println("\nOutputs current time and unix time");
+}
+
+void  help_time_set() {
+  Serial.println("\nEnter \"time_set YYMMDDHHMMSS\" where:");
   Serial.println("  YY is years, MM is months, DD is days, HH is hours(24), MM is minutes, SS is seconds");
 }
+
 void help_bme680() {
   Serial.println("\nOutputs of temperature, humidity, pressure, and gas sensor readings");
 }
-void help_time() {
-  Serial.println("\nOutputs now time and unix time");
-}
+
 void help_dir() {
   Serial.println("\nOutputs SD card directory and files");
 }
+
 void help_mkdir() {
   Serial.println("\nTo make a directory or folder \"mkdir foldername\"");
 }
+
 void help_rmdir() {
   Serial.println("\nRemoves a directory or folder \"rmdir foldernam\"");
 }
+
 void help_open() {
   Serial.println("\nCreate a file within a folder/directory \"open filename\"");
 }
+
 void help_erase() {
   Serial.println("\nTo remove/delete a file \"erase filename\"");
 }
+
 void help_rtcreg() {
   Serial.println("\n list all the registors in the PCF85263 Real Time Clock");                                                                                                     
 }
+
 void help_dump() {
   Serial.println("Will dump contents of an SD file to the terminal in HEX");
   Serial.println("Example =>dump filename.ext");
 }
+
 void help_sphoto() {
   Serial.println("Take a photo and store it on SD card");
   Serial.println("Example =>sphoto filename.jpg");
 }
+
 void help_upload() {
   Serial.println("Upload a file from SD card to the Host controller");
   Serial.println("Example =>upload filename");
   Serial.println("will find file on SD card, upload a jpg with the file name");
   Serial.println("and a text file with the same file name");
 }
+
 void help_io() {
   Serial.println("io \"IOnumber\" \"H\" or \"L\"");
   Serial.println("\"Example =>io 7 L\"  will cause IO7 to go Low");
 }
+
 void help_ana() {
   Serial.println("Sample A0 through A3 analog input");
   Serial.println("print the voltage values on earch input");
 }
+
 void help_takeSphoto() {
   Serial.println("Take a photo using the Serial C329 camera");
   Serial.println("Place the photo header in the output Queue");
   Serial.println("the photo will be picked up and sent to the Host");
   Serial.println("during the next request for data from the Host");
 }
+
 void help_stackandheap() {
   Serial.println("will printout both stack pointer ahd heap pointer ");
 }
+
 void help_initQueue() {
   Serial.println("Setup the Photo Queue's space and pointers");
   Serial.println("Set to empty Queue");
 }
+
 void help_text() {
   Serial.println("Create and Output to the terminial the Text message");
   Serial.println("that will be appended to the photo putput");
 }
+
 void help_view() {
   Serial.println("Must use the python terminal, it will take a serial  photo");
   Serial.println("place the photo on the SD card, then will output the jpg image");
@@ -939,55 +959,69 @@ void help_view() {
   Serial.println("code into a jpg file in a folder on the terminal computer. The jpg file");
   Serial.println("can then be clicked on to open the photo on the terminal screen");
 }
+
 void help_tdump() {
   Serial.println("Output to terminal the contents of a file in Ascii Text Mode");
 }
+
 void help_info() {
   Serial.println("Send to Terminal, information header for this program version");
 }
+
 void help_trtc() {
   Serial.println("Look at the bits set in the RTC control registers");
 }
+
 void help_format() {
   Serial.println("Will format the SD card with Fat32 format, all");
   Serial.println("will be erased and directories removed");
 }
+
 void help_free() {
   Serial.println("Will send to terminial the free space on the SD card");
 }
+
 void help_takeSpiphoto() {
   Serial.println("Will take a photo using c329 spi camera, will store");
   Serial.println("it on the SD card, place it in the Queue to send it ");
   Serial.println("the Host on the next request from Host");
 }
+
 void help_framdump() {
   Serial.println("Will send to the terminal the first- 512 bytes of fram");
   Serial.println("memory space, this is where all non volatile variables");
   Serial.println("are stored"); 
 }
+
 void help_initfram() {
   Serial.println("this will clear, set to 0, all photo counters,");
   Serial.println("reset number counter, and the mission clock");
   Serial.println("this should be executed before FLIGHT operations");
 }
+
 void help_framclear() {
   Serial.println("This will clear all of fram to zero, for the fram");
   Serial.println("to be set up for flight a initfram must be performed");
 }
+
 void help_SystemSetup() {
   Serial.println("Comming Soon");
 }
+
 void help_ReadSetup() {
   Serial.println("Comming Soon");
 }
+
 void help_listQue() {
   Serial.println("Will list all the photo files in the Queue waiting");
   Serial.println("to be sent the the Host");
 }
+
 void help_enterTeamID() {
   Serial.println("Using the form 'enterTeamID D' with D being");
   Serial.println("your Teams Idenification Number A through O");
 }
+
 //
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_tdump() {                       //Download SD file in ASCII
@@ -1411,8 +1445,8 @@ void setPCF85263()            // this function sets the time and date to the PCF
   Wire.write(decToBcd(year));
   Wire.endTransmission();
 }
-//
-int cmd_settime() {
+
+int cmd_time_set() {
   Serial.println("YYMMDDHHMMSS");                   //print header for referance
   Serial.println(args[1]);                          //print input to asure correct
   year = ((args[1][1]) + (args[1][0] * 10) - 16);   //set year (why + 16 ???)
@@ -1425,6 +1459,11 @@ int cmd_settime() {
   cmd_time();                                       //print out the new time
   return 0;                                         //return no error
 }
+
+int cmd_settime() {
+  return cmd_time_set();
+}
+
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int cmd_rtcreg() {            //read status Ram byte from RTC
