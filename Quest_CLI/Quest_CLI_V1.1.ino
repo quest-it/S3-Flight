@@ -760,27 +760,22 @@ void read_line() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 void parse_line() {
-  char *argument;
   int counter = 0;
-
-  argument = strtok(line, " ");
+  char *argument = strtok(line, " ");
 
   while ((argument != NULL)) {
+    if (counter >= MAX_NUM_ARGS) {
+      break;
+    }
 
-
-    if (counter < MAX_NUM_ARGS) {
-      if (strlen(argument) < ARG_BUF_SIZE) {
-        strcpy(args[counter], argument);
-        argument = strtok(NULL, " ");     ///////
-        counter++;
-      }
-      else {
-        Serial.println("Input string too long.");
-        error_flag = true;
-        break;
-      }
+    if (strlen(argument) < ARG_BUF_SIZE) {
+      strcpy(args[counter], argument);
+      argument = strtok(NULL, " ");
+      counter++;
     }
     else {
+      Serial.println("Input string too long.");
+      error_flag = true;
       break;
     }
   }
@@ -1040,13 +1035,14 @@ int cmd_mkdir() {                                                               
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serialin IRQ during SD operations - SD uses IRQ itself
   FsDateTime::setCallback(dateTime);                                            //set time and date for file
   bool returnValue = 0;
+
   if (!SD.mkdir(args[1])) {                                                     //make directory with 1st argument of input
-    Serial.print("Create folder ");                                             //show could not create
-    Serial.print(args[1]);                                                      //show could not create
-    Serial.println(" failed");                                                  //show could not create
+    Serial.printf("Create folder %s failed\n", args[1]);
     returnValue = 1;                                                            //return with error
   }
+
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
+
   return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -1054,13 +1050,14 @@ int cmd_mkdir() {                                                               
 int cmd_rmdir() {
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
   bool returnValue = 0;
+
   if (!SD.rmdir(args[1])) {                                                     //make directory with 1st argument of input
-    Serial.print("Remove folder ");                                             //show could not create
-    Serial.print(args[1]);                                                      //show could not create
-    Serial.println(" failed");                                                  //show could not create
+    Serial.printf("Remove folder %s failed\n", args[1]);
     returnValue = 1;                                                            //return with error
   }
+
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
+
   return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -1068,11 +1065,13 @@ int cmd_rmdir() {
 int cmd_open() {                                // Create File in current directory.
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
   FsDateTime::setCallback(dateTime);            //set time and date for file
+
   if (!file.open(args[1], O_WRONLY | O_CREAT)) { //Create and write only
-    Serial.println("create File failed");
+    Serial.printf("create file %s failed", args[1]);
     attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
     return 1;
   }
+
   file.println("Testing 1,2,3...");
   file.close();                               //close file just opened
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
@@ -1082,13 +1081,15 @@ int cmd_open() {                                // Create File in current direct
 
 int cmd_erase() {                            //remove or erase a file in current dir
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  bool returnValue = 0;
+
   if (!SD.remove(args[1])) {                  //erase the file in current directory
-    Serial.println("erase file failed");
-    attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-    return 1;
+    Serial.printf("erase file %s failed\n", args[1]);
+    returnValue = 1;
   }
+
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-  return 0;
+  return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
@@ -1103,11 +1104,7 @@ int cmd_led() {
   }
   else if (strcmp(args[1], led_args[2]) == 0) {
     if (atoi(args[2]) > 0) {
-      Serial.print("Blinking the LED ");
-      Serial.print(blink_cycles);
-      Serial.print(" times at ");
-      Serial.print(args[2]);
-      Serial.println(" Hz.");
+      Serial.printf("Blinking the LED %d times at %d Hz.", blink_cycles, args[2]);
 
       int delay_ms = (int)round(1000.0 / atoi(args[2]) / 2);
 
@@ -1263,9 +1260,6 @@ int read_bme680() {
   i = i - ((i / 10) * 10);
   text_altitude[27] = (i % 10) + '0';
 
-  //
-
-  //
   return 0;
 }
 
@@ -1499,8 +1493,7 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
     return 0;         //return with 0 is error
 
   }
-  //  Serial.println("SD OK");                          //testing
-  //
+
   FsDateTime::setCallback(dateTime);                    //get time and date for file
   //
   //
@@ -1514,11 +1507,11 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
   // ----- File name in args[1} -
   photoFile = SD.open(args[1], FILE_WRITE);             //Open to write file named photoFile
   photoFile.seek(0);                                    //Point to first entry in file
-  writtenPictureSize = 0;                               //Clear the Pitchure Sixe for counting
-  //  Serial.println("open OK");                          //testing
-  digitalWrite(Cam_power, Cam_power_OFF);             //Serial and SPI camera cycle power off
+  writtenPictureSize = 0;                               //Clear the picture size for counting
+
+  digitalWrite(Cam_power, Cam_power_OFF);               //Serial and SPI camera cycle power off
   delay(100);                                           //wait for good reset time 100ms
-  digitalWrite(Cam_power, Cam_power_ON);              //Serial and SPI camera cycle power ON
+  digitalWrite(Cam_power, Cam_power_ON);                //Serial and SPI camera cycle power ON
   delay(200);                                           //Camera Boot Time
   if (!camera.sync())                                   //Send sync bytes to camera
   {
@@ -1526,7 +1519,7 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
     CameraCleanReturn();                                //clean up camera set up
     return 0;                                           //return with 0 is error
   }
-  //  Serial.println("Sync OK");                          //testing
+
   if (!camera.initialize(Quest_CameraC329::BAUD14400, Quest_CameraC329::CT_JPEG, Quest_CameraC329::PR_160x120, Quest_CameraC329::JR_640x480)) //write initJR_320x240
     //
   {
@@ -1534,14 +1527,14 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
     CameraCleanReturn();                                //clean up camera set up
     return 0;                                           //return with 0 is error
   }
-  //  Serial.println("init OK");                          //testing
+
   if (!camera.setQuality(Quest_CameraC329::QL_BEST))    //Set Quality, amount of compression
   {
     Serial.println("Set quality failed");               //quality failed, something wrong
     CameraCleanReturn();                                //clean up camera set up
     return 0;                                           //return with 0 is error
   }
-  //  Serial.println("Qual OK");                          //testing
+
   if (!camera.getPicture(Quest_CameraC329::PT_JPEG_PREVIEW, &getPicture_callback)) //Take and get the picture
   {
     Serial.println("Get Picture Failed");                 //Could not get the picture
@@ -1688,8 +1681,6 @@ int cmd_io() {                      //command to upload a file to the Host use S
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_ana() {                      //command to upload a file to the Host use SD for now.
-  Serial.println("cmd_ana()");
-
   Serial.printf("A0 = %.2f  ",   analogRead(A0) * (3.3 / 1023));
   Serial.printf("A1 = %.2f  ",   analogRead(A1) * (3.3 / 1023));
   Serial.printf("A2 = %.2f  ",   analogRead(A2) * (3.3 / 1023));
@@ -1703,8 +1694,6 @@ int cmd_ana() {                      //command to upload a file to the Host use 
 //file on disk = {FileID[0],FileType,'5','4','3','2','1','.','j','p','g'};   //type S,P,D
 //
 int cmd_takeSphoto() {        //19 - take a serial photo get a file name then place it in the Host Queue
-  Serial.println("cmd_takeSphoto()");
-
   Serial.printf("P0Maddress = %d\nSerial photo ID = %c", readintFromfram(PCSaddress), (char)readbyteFromfram(ID));
 
   int x = (readintFromfram(PCSaddress));    //get next serial photo name
