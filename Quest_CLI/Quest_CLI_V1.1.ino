@@ -625,7 +625,6 @@ void setup() {
 //-----------------------------------------------------------------------------------
 //
 void loop() {
-
   Serial.printf("\nSystem Boot Version %s\n", Qversion);
   Serial.printf("Compiled Date => %s\n", compile_date);
   Serial.printf("Source file => %s\n\n", source_file);
@@ -638,10 +637,10 @@ void loop() {
   uint32_t currentMillis = millis();          //this is time now
   uint16_t countdown = 15;                    //tet countdown clock
   long unsigned int milliscountdown = millis();       //countdown counter for test
+
   //??????????????????????????????????????????????????????????????????????????????????????????????????????
   //   test for Flying();                           //Set Flying active and go to flight programming
   //??????????????????????????????????????????????????????????????????????????????????????????????????????
-  //
   testing = false;                          //default no testing
   while ((millis() - currentMillis) < testtimeout) {
     if (Serial.available()) {
@@ -658,9 +657,11 @@ void loop() {
         Serial.printf("Enter 'T' of 't' for test else enter flying (%2d)   version = ", countdown); Serial.println(Qversion);
     }
   }
+
   if (testing == true) {
     SoftwareReset();
   }
+
   Flying();                 //Set Flying active and go to flight programming
   SoftwareReset();          //here when aborted from Flying
 }
@@ -879,7 +880,7 @@ void help_time() {
   Serial.println("\nOutputs current time and unix time");
 }
 
-void  help_time_set() {
+void help_time_set() {
   Serial.println("\nEnter \"time_set YYMMDDHHMMSS\" where:");
   Serial.println("  YY is years, MM is months, DD is days, HH is hours(24), MM is minutes, SS is seconds");
 }
@@ -1455,17 +1456,17 @@ void setPCF85263()            // this function sets the time and date to the PCF
 }
 
 int cmd_time_set() {
-  Serial.println("YYMMDDHHMMSS");                   //print header for referance
-  Serial.println(args[1]);                          //print input to asure correct
-  year = ((args[1][1]) + (args[1][0] * 10) - 16);   //set year (why + 16 ???)
-  month = (args[1][3] + (args[1][2] * 10) - 16);    //set month (don't know why always +16)
-  dayOfMonth = (args[1][5] + (args[1][4] * 10) - 16); //place holder in read, not used
-  hour = (args[1][7] + (args[1][6] * 10) - 16);     //set hour (still +16?)
-  minute = (args[1][9] + (args[1][8] * 10) - 16);   //set minute (+16??)
-  second = (args[1][11] + (args[1][10] * 10) - 16); //set second (+16??)
-  setPCF85263();                                    //write the time to pcf85263
-  cmd_time();                                       //print out the new time
-  return 0;                                         //return no error
+  Serial.println("YYMMDDHHMMSS");                       //print header for reference
+  Serial.println(args[1]);                              //print input to assure correct
+  year = ((args[1][1]) + (args[1][0] * 10) - 16);       //set year (why + 16 ???)
+  month = (args[1][3] + (args[1][2] * 10) - 16);        //set month (don't know why always +16)
+  dayOfMonth = (args[1][5] + (args[1][4] * 10) - 16);   //place holder in read, not used
+  hour = (args[1][7] + (args[1][6] * 10) - 16);         //set hour (still +16?)
+  minute = (args[1][9] + (args[1][8] * 10) - 16);       //set minute (+16??)
+  second = (args[1][11] + (args[1][10] * 10) - 16);     //set second (+16??)
+  setPCF85263();                                        //write the time to pcf85263
+  cmd_time();                                           //print out the new time
+  return 0;                                             //return no error
 }
 
 int cmd_settime() {
