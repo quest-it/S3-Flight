@@ -230,9 +230,9 @@ char PN[8] = {"1234567"};   //converted photonumber into ascii to send to master
 //   this is a cludge and work around for now, must ba a better way....!!
 //
 int download_number = 1000000;
-uint32_t photonumber = download_number; //photo number, will count up
-int photolength = 1030;                 //photo jpg length
-int photobytecount = 0;                 //for loop count of transfer
+uint32_t photonumber = download_number;   //photo number, will count up
+int photolength = 1030;                   //photo jpg length
+int photobytecount = 0;                   //for loop count of transfer
 int  photodata = 0;
 //
 //---------------  Mission time stuff -------------------------------
@@ -245,9 +245,9 @@ uint16_t LEDpin = 13;
 uint16_t blink_cycles = 10;               //How many times the LED will blink
 bool error_flag = false;
 
-uint32_t looptimebase = 0;               //loop heartbeat time
-#define loopcount     (200)              //for testing main loop heartbeat time
-uint16_t looper = 0;                     //count within loop count
+uint32_t looptimebase = 0;                //loop heartbeat time
+#define loopcount     (200)               //for testing main loop heartbeat time
+uint16_t looper = 0;                      //count within loop count
 uint32_t IRQreference = 0; //
 uint16_t IRQinvalid = 0;                  //set for the next incoming irq to be invalid
 //-------------------------------
@@ -469,7 +469,7 @@ void addMissionClockPortion(int units, int initialOffset, const char *label) {
     output++;
   }
 
-  text_Mission[initialOffset] = *label;                  // Add the units label
+  text_Mission[initialOffset] = *label;                 // Add the units label
 }
 //
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -493,7 +493,7 @@ void getMissionClock() {
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 //   write to Host and Output to Terminal
 //
-void send_T_host(uint8_t x) {     //
+void send_T_host(uint8_t x) {
   softuartwrite(x);             //send to Host
   Serial.write(x);              //send to terminal
 }
@@ -505,7 +505,7 @@ void dateTime(uint16_t* date, uint16_t* time, uint8_t* ms10) {
   DateTime now = rtc.now();
   *date = FS_DATE(now.year(), now.month(), now.day());        // Return date using FS_DATE macro to format fields.
   *time = FS_TIME(now.hour(), now.minute(), now.second());    // Return time using FS_TIME macro to format fields.
-  *ms10 = now.second() & 1 ? 100 : 0;                 // Return low time bits in units of 10 ms, 0 <= ms10 <= 199.
+  *ms10 = now.second() & 1 ? 100 : 0;                         // Return low time bits in units of 10 ms, 0 <= ms10 <= 199.
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 //        Software reset function
@@ -514,7 +514,7 @@ void (*resetFunc)() = 0;  //point resetFunction to address 0 reset vector
 //
 //Software reset ARM
 void SoftwareReset(void) {
-  Serial.print("\r\n\n*** System Reseting - Must restart serial terminal ***\r\n\n");
+  Serial.print("\r\n\n*** System Resetting - Must restart serial terminal ***\r\n\n");
   delay(2000);
   // generic way to request a reset
   //from software for ARM Cortex
@@ -709,25 +709,24 @@ void read_line() {
   char inbyte = 0;
 
   while (inbyte != ('\r')) {
-    //Serial.print("*");
     // Here waiting for an input from terminal, no input blink DotStar LED
-    while (!Serial.available()) {                                     //Waiting for iput Blink led for CLI Heart Beat
-      if (millis() - looptimebase > loopcount) {                     //loop heartbeat timer
+    while (!Serial.available()) {                                   //Waiting for input - Blink led for CLI Heart Beat
+      if (millis() - looptimebase > loopcount) {                    //loop heartbeat timer
         looptimebase = millis();                                    //reset time
         looper++;                                                   //Routine to make the DotStar blink to indicate in CLI Mode
         if (looper == 1) {
           DotStarBlue(); //on 10%
-        }//digitalWrite(LEDpin,HIGH);}
-        if (looper == 2) {
+        }
+        else if (looper == 2) {
           DotStarOff(); //off 10%
-        }//digitalWrite(LEDpin,LOW);}
-        if (looper == 3) {
+        }
+        else if (looper == 3) {
           DotStarBlue(); //on 10%
-        }//digitalWrite(LEDpin,HIGH);}
-        if (looper == 4) {
+        }
+        else if (looper == 4) {
           DotStarOff(); //off 70%
-        }//digitalWrite(LEDpin,LOW);}
-        if (looper > 9) {
+        }
+        else if (looper > 9) {
           looper = 0;
         }
       }
