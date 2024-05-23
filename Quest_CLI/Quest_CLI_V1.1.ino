@@ -152,23 +152,23 @@ char args[MAX_NUM_ARGS][ARG_BUF_SIZE];
 //
 //----------- System Stroage ------------------------------------
 //
-byte Status = 0x20;            //MicroLab Status Byte
-#define Bank0status  (0x01)   //data in bank 0
-//#define Bank1status  (0x02)   //data in bank 1
-//#define Bank2status  (0x04)   //data in bank 2
-//int Bankcount = 0x00;         //Storage bank counter 0,1,2,3,4,5,6,7
-uint8_t FileReadError = 0;     //0=no error 1= error opening file
-uint8_t Abortphoto = 0;      //jpg photo abort error snyc
-uint32_t currentunix = 0;     //placeholder for current unix
+byte Status = 0x20;               //MicroLab Status Byte
+#define Bank0status  (0x01)       //data in bank 0
+//#define Bank1status  (0x02)     //data in bank 1
+//#define Bank2status  (0x04)     //data in bank 2
+//int Bankcount = 0x00;           //Storage bank counter 0,1,2,3,4,5,6,7
+uint8_t FileReadError = 0;        //0=no error 1= error opening file
+uint8_t Abortphoto = 0;           //jpg photo abort error snyc
+uint32_t currentunix = 0;         //placeholder for current unix
 //--------------------------------------------------------------
 //    File naming templets, file Queue holds Host output format.
 //
 //char FileHeader[] = {'X','T','4','3','2','1','0','P',0x04,0x80};  //header string to send to host
-// X = Team ID, T = photo file source, sequencial number for files, P = placeholder for future, size - lsb msb
+// X = Team ID, T = photo file source, sequential number for files, P = placeholder for future, size - lsb msb
 //
-char filenameS[] = "XS00000PSS";        //create filename templet for name serial, SS = size of file
-char filenameP[] = "XP00000PSS";        //create filename templet for name SPI, SS = size of file
-char filenameD[] = "XD00000PSS";        //create filename templet for Data only- file, SS = size of file
+char filenameS[] = "XS00000PSS";        //create filename template for name serial, SS = size of file
+char filenameP[] = "XP00000PSS";        //create filename template for name SPI, SS = size of file
+char filenameD[] = "XD00000PSS";        //create filename template for Data only- file, SS = size of file
 const char* Quefile[15];
 //
 #define USER_TEXT_BUF_SIZE   1024                               //Text buffer 0
@@ -449,8 +449,8 @@ void logit_string() {
     return;
   }
   
-  Logfile.println();                                                    //add a carrage return/line feed
-  delayMicroseconds(100);                                               //wait 100 microsec
+  Logfile.println();                                                    //add a carriage return/line feed
+  delayMicroseconds(100);                                               //wait 100 microseconds
   for (uint8_t x = 0x20; x < 128; x++) {                                //print a string to log file
     Logfile.write(x);                                                   //write one character at a time
   }
@@ -571,7 +571,7 @@ void setup() {
   pinMode(Sel0, OUTPUT);                            // Selection serial camera or serial from host
   digitalWrite(Sel0, LOW);                          // default low connect serial to host
 
-  pinMode (SPI_cam_CS, OUTPUT);                     // set spicamera CS pin. output
+  pinMode (SPI_cam_CS, OUTPUT);                     // set spi camera CS pin. output
   digitalWrite(SPI_cam_CS, HIGH);
   // SPI_cam_Power = 7;                             // SPI camera power pin
   const int SPIcamON = 1;                           // Power on the SPI camera    Removed for test of quest init 0503
@@ -589,7 +589,7 @@ void setup() {
   Wire.beginTransmission(PCF85263address);
   Wire.write(byte (0x25));                          // Osc Register
   Wire.write(byte (0x03));                          // Set to 12.5pf
-  Wire.endTransmission();                           // end xmission
+  Wire.endTransmission();                           // end transmission
   Serial.println("RTC xyal set");
   //
   //
@@ -610,7 +610,7 @@ void setup() {
   testing = false;    //reset active command line processing flag
   flight = false;     //reset flight active flag
 
-  IRQreference = millis();          //capture millis start of interrupt(millis not availiable in IRQ)
+  IRQreference = millis();          //capture millis start of interrupt(millis not available in IRQ)
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);
   Serial.println("Interrupts enabled ");
 }
@@ -647,6 +647,8 @@ void loop() {
     if(millis() - milliscountdown > 1000){      //count every second in waiting for test
         milliscountdown = millis();
         countdown--;                            //decrease count for test
+
+        // The qversion is not part of the first string because printf was having trouble with it.
         Serial.printf("Enter 'T' of 't' for test else enter flying (%2d)   version = ", countdown); Serial.println(Qversion);
     }
   }
@@ -676,8 +678,6 @@ void my_cli() {
   static bool first_run = true;
   cli_init();
   while (testing == true) {
-    //     stackandheap();             //output stack and heap
-
     Serial.print("=>");
     read_line();
 
@@ -733,11 +733,11 @@ void read_line() {
     }
     //Here to get input from terminal, check for end of line then prac the line
     if (Serial.available()) {
-      inbyte = Serial.read();          //fetch the input byte
+      inbyte = Serial.read();                                   //fetch the input byte
       if (inbyte == ('\r')) {
         line_string = line_string + (" ");
-        if (line_string.length() < LINE_BUF_SIZE) {            //check for oversize buffer input
-          line_string.toCharArray(line, LINE_BUF_SIZE);       //convert string to char array
+        if (line_string.length() < LINE_BUF_SIZE) {             //check for oversize buffer input
+          line_string.toCharArray(line, LINE_BUF_SIZE);         //convert string to char array
         }
         else {
           Serial.println("Input string too long.");
@@ -745,7 +745,7 @@ void read_line() {
         }
         Serial.print('\n');
       }
-      line_string = line_string + inbyte;   //add inbyte to string
+      line_string = line_string + inbyte;                       //add inbyte to string
       Serial.write(inbyte);
     }
   }
@@ -839,7 +839,7 @@ void help_help() {
 }
 
 void help_led() {
-  Serial.printf("Control the on-board LED, either on, off or blinking %d times:\n", blink_cycles);  //help for led
+  Serial.printf("Control the on-board LED, either on, off or blinking %d times:\n", blink_cycles);
   Serial.println("  led on");
   Serial.println("  led off");
   Serial.println("  led blink hz");
@@ -1048,15 +1048,15 @@ int cmd_tdump() {                       //Download SD file in ASCII
   return 0;
 }
 
-int cmd_dir() {                           //list the SD card directory of files
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
-  SD.ls(LS_DATE | LS_SIZE | LS_R);      //list directory command
-  Serial.println(F("Done"));            //say done
+int cmd_dir() {                                           //list the SD card directory of files
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));    //detach the serial in IRQ during SD operations - SD uses IRQ itself
+  SD.ls(LS_DATE | LS_SIZE | LS_R);                        //list directory command
+  Serial.println(F("Done"));                              //say done
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-  return 0;                               //return no error
+  return 0;                                               //return no error
 }
 
-int cmd_enterTeamID() {                      //Enter Team ID
+int cmd_enterTeamID() {                                   //Enter Team ID
   char x = args[1][0];
   writebytefram(x, ID);
   //writeIDfram(args[1]);
@@ -1067,7 +1067,7 @@ int cmd_enterTeamID() {                      //Enter Team ID
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_mkdir() {                                                               //Make a new directory of sub directory
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serial in IRQ during SD operations - SD uses IRQ itself
   FsDateTime::setCallback(dateTime);                                            //set time and date for file
   bool returnValue = 0;
 
@@ -1076,14 +1076,14 @@ int cmd_mkdir() {                                                               
     returnValue = 1;                                                            //return with error
   }
 
-  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
+  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);   //reattach interrupts to Host
 
   return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 int cmd_rmdir() {
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serial in IRQ during SD operations - SD uses IRQ itself
   bool returnValue = 0;
 
   if (!SD.rmdir(args[1])) {                                                     //make directory with 1st argument of input
@@ -1091,39 +1091,39 @@ int cmd_rmdir() {
     returnValue = 1;                                                            //return with error
   }
 
-  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
+  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);   //reattach interrupts to Host
 
   return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-int cmd_open() {                                // Create File in current directory.
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
-  FsDateTime::setCallback(dateTime);            //set time and date for file
+int cmd_open() {                                                                // Create File in current directory.
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  FsDateTime::setCallback(dateTime);                                            //set time and date for file
 
-  if (!file.open(args[1], O_WRONLY | O_CREAT)) { //Create and write only
+  if (!file.open(args[1], O_WRONLY | O_CREAT)) {                                //Create and write only
     Serial.printf("create file %s failed", args[1]);
     attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
     return 1;
   }
 
   file.println("Testing 1,2,3...");
-  file.close();                               //close file just opened
-  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-  return 0;                                   //return no error
+  file.close();                                                                 //close file just opened
+  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);   //reattach interrupts to Host
+  return 0;                                                                     //return no error
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-int cmd_erase() {                            //remove or erase a file in current dir
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
+int cmd_erase() {                                                               //remove or erase a file in current dir
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));                          //detach the serialin IRQ during SD operations - SD uses IRQ itself
   bool returnValue = 0;
 
-  if (!SD.remove(args[1])) {                  //erase the file in current directory
+  if (!SD.remove(args[1])) {                                                    //erase the file in current directory
     Serial.printf("erase file %s failed\n", args[1]);
     returnValue = 1;
   }
 
-  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
+  attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);   //reattach interrupts to Host
   return returnValue;
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -1232,7 +1232,7 @@ int read_bme680() {
   text_Atemp[34] = (i / 10) + '0';
   text_Atemp[35] = (i % 10) + '0';
   //
-  i = (bme.humidity * 1000);                      //place humidity in text output buffer
+  i = (bme.humidity * 1000);                            //place humidity in text output buffer
   text_humidity[19] = (i / 10000) + '0';
   i = i - ((i / 10000) * 10000);
   text_humidity[20] = (i / 1000) + '0';
@@ -1241,7 +1241,7 @@ int read_bme680() {
   i = i - ((i / 100) * 100);
   text_humidity[23] = (i / 10) + '0';
   //
-  i = (bme.gas_resistance);                        //place gas resistance in text output buffer
+  i = (bme.gas_resistance);                             //place gas resistance in text output buffer
   text_gas[6] = (i / 100000) + '0';
   i = i - ((i / 100000) * 100000);
   text_gas[7] = (i / 10000) + '0';
@@ -1252,7 +1252,7 @@ int read_bme680() {
   i = i - ((i / 100) * 100);
   text_gas[11] = (i / 10) + '0';
   //
-  i = (bme.pressure);                        //place pressure hpa in text output buffer
+  i = (bme.pressure);                                   //place pressure hpa in text output buffer
   text_pressure[11] = (i / 100000) + '0';
   i = i - ((i / 100000) * 100000);
   text_pressure[12] = (i / 10000) + '0';
@@ -1313,28 +1313,28 @@ int cmd_bme680() {
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 byte bcdToDec(byte value) {
-  return ((value / 16) * 10 + value % 16); //used in time
+  return ((value / 16) * 10 + value % 16);            //used in time
 }
 byte decToBcd(byte value) {
-  return (value / 10 * 16 + value % 10); //used in time
+  return (value / 10 * 16 + value % 10);              //used in time
 }
 
-void readPCF85263()          // this gets the time and date from the PCF85263
+void readPCF85263()                                   // this gets the time and date from the PCF85263
 {
   Wire.beginTransmission(PCF85263address);
   Wire.write(0x01);
   Wire.endTransmission();
   Wire.requestFrom(PCF85263address, 7);
-  second     = bcdToDec(Wire.read() & B01111111); // remove VL error bit
-  minute     = bcdToDec(Wire.read() & B01111111); // remove unwanted bits from MSB
+  second     = bcdToDec(Wire.read() & B01111111);     // remove VL error bit
+  minute     = bcdToDec(Wire.read() & B01111111);     // remove unwanted bits from MSB
   hour       = bcdToDec(Wire.read() & B00111111);
   dayOfMonth = bcdToDec(Wire.read() & B00111111);
   dayOfWeek  = bcdToDec(Wire.read() & B00000111);
-  month      = bcdToDec(Wire.read() & B00011111); // remove century bit, 1999 is over
+  month      = bcdToDec(Wire.read() & B00011111);     // remove century bit, 1999 is over
   year       = bcdToDec(Wire.read());
 
 
-  if (month < 10) {                           //add month to char output buffer
+  if (month < 10) {                                   //add month to char output buffer
     text_time[12] = '0';
   }
   else {
@@ -1342,7 +1342,7 @@ void readPCF85263()          // this gets the time and date from the PCF85263
   }
   text_time[13] = (month % 10) + '0';
   //
-  if (dayOfMonth < 10) {                     //add day to char output buffer
+  if (dayOfMonth < 10) {                              //add day to char output buffer
     text_time[15] = '0';
   }
   else {
@@ -1350,10 +1350,10 @@ void readPCF85263()          // this gets the time and date from the PCF85263
   }
   text_time[16] = (dayOfMonth % 10) + '0';
   //
-  text_time[18] = (year / 10) + '0';     //add year to char output buffer
+  text_time[18] = (year / 10) + '0';                  //add year to char output buffer
   text_time[19] = (year % 10) + '0';
   //
-  if (hour < 10) {                           //add hour to char output buffer
+  if (hour < 10) {                                    //add hour to char output buffer
     text_time[23] =  '0';
   }
   else {
@@ -1361,7 +1361,7 @@ void readPCF85263()          // this gets the time and date from the PCF85263
   }
   text_time[24] = (hour % 10) + '0';
   //
-  if (minute < 10) {                           //add minute to char output buffer
+  if (minute < 10) {                                  //add minute to char output buffer
     text_time[26] =  '0';
   }
   else {
@@ -1369,7 +1369,7 @@ void readPCF85263()          // this gets the time and date from the PCF85263
   }
   text_time[27] = (minute % 10) + '0';
   //
-  if (second < 10) {                           //add second to char output buffer
+  if (second < 10) {                                  //add second to char output buffer
     text_time[29] =  '0';
   }
   else {
@@ -1378,22 +1378,19 @@ void readPCF85263()          // this gets the time and date from the PCF85263
   text_time[30] = (second % 10) + '0';
   //
   //
-  DateTime now = rtc.now();                 //add Unix time to char output buffer
+  DateTime now = rtc.now();                           //add Unix time to char output buffer
   str = String(now.unixtime());
   str.toCharArray(text_buf, 11);
-  int y = 32;                           //set destination pointer into array
+  int y = 32;                                         //set destination pointer into array
   for (int i = 0; i < 11; i++) {
-    text_Unix[y] = text_buf[i];          //move data to new array
-    y++;                                 //move destination pointer
+    text_Unix[y] = text_buf[i];                       //move data to new array
+    y++;                                              //move destination pointer
   }
-  //
-
-
 }
+
 int cmd_time() {
   readPCF85263();
-  //   Serial.print(days[dayOfWeek]);
-  //   Serial.print(" ");
+
   if (month < 10)
   {
     Serial.print("0");
@@ -1433,7 +1430,7 @@ int cmd_time() {
 }
 //
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-void setPCF85263()            // this function sets the time and date to the PCF85263
+void setPCF85263()                                      // this function sets the time and date to the PCF85263
 {
   Wire.beginTransmission(PCF85263address);
   Wire.write(0x01);
@@ -1467,10 +1464,10 @@ int cmd_settime() {
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-int cmd_rtcreg() {            //read status Ram byte from RTC
-  Wire.begin();                                    //begin I2C operation
-  Wire.beginTransmission(PCF85263address);         //address the RTC
-  Wire.write(byte (0x00));                         //Ram in RTC
+int cmd_rtcreg() {                                      //read status Ram byte from RTC
+  Wire.begin();                                         //begin I2C operation
+  Wire.beginTransmission(PCF85263address);              //address the RTC
+  Wire.write(byte (0x00));                              //Ram in RTC
   Wire.endTransmission();
   Wire.requestFrom(PCF85263address, 0x2F);
   for (int i = 0; i <= 0x2F; i++) {
@@ -1484,7 +1481,7 @@ int cmd_rtcreg() {            //read status Ram byte from RTC
 }
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
-int cmd_dump() {                          //Download SD file in HEX
+int cmd_dump() {                                        //Download SD file in HEX
   File dataFile = SD.open(args[1]);
   if (!dataFile) {
     Serial.println("error opening file");
@@ -1493,14 +1490,14 @@ int cmd_dump() {                          //Download SD file in HEX
 
   int i = 0;
   while (dataFile.available()) {
-    if (i % 16 == 0) {                // put a header on this line with the address
+    if (i % 16 == 0) {                                  // put a header on this line with the address
       Serial.printf("\n%04X  ", i);
     }
     uint8_t x = dataFile.read();
-    Serial.printf("%02X ", x);        // print the data
-    i++;                              // to next data to form 16 colums
+    Serial.printf("%02X ", x);                          // print the data
+    i++;                                                // to next data to form 16 colums
   }
-  dataFile.close();                   //close the data file
+  dataFile.close();                                     //close the data file
   Serial.println();
   return 0;
 }
@@ -1521,7 +1518,7 @@ void getPicture_callback(uint32_t pictureSize, uint16_t packetSize, uint32_t pac
 //-------------------------------------------------------------------------------------------
 // enter with args[1]  set to file name without extension
 //
-int cmd_sphoto() {                                    //take C329 Serial Photo and Store on SD
+int cmd_sphoto() {                                      //take C329 Serial Photo and Store on SD
   detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
   digitalWrite(Sel0, HIGH);                             //high to select serial to C329 camera
   Serial1.begin(CAMERA_BAUD);                           //Set default Baud rate to camera
@@ -1530,18 +1527,18 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
     Serial.println("SD initialization failed");         //  SD failed
     CameraCleanReturn();                                // Clean up camera set up
     attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
-    return 0;         //return with 0 is error
+    return 0;                                           //return with 0 is error
 
   }
 
   FsDateTime::setCallback(dateTime);                    //get time and date for file
   //
   //
-  strcat(args[1], ".jpg");                             //add .jpg to file name
+  strcat(args[1], ".jpg");                              //add .jpg to file name
   //
-  if (SD.exists(args[1])) {                       //check if file already exists
-    SD.remove(args[1]);                                       //will erase existing file
-    Serial.println("\r\nerasing existing photoFile");            //say it
+  if (SD.exists(args[1])) {                             //check if file already exists
+    SD.remove(args[1]);                                 //will erase existing file
+    Serial.println("\r\nerasing existing photoFile");   //say it
   }
   //
   // ----- File name in args[1} -
@@ -1577,32 +1574,32 @@ int cmd_sphoto() {                                    //take C329 Serial Photo a
 
   if (!camera.getPicture(Quest_CameraC329::PT_JPEG_PREVIEW, &getPicture_callback)) //Take and get the picture
   {
-    Serial.println("Get Picture Failed");                 //Could not get the picture
-    CameraCleanReturn();                                  //clean up camera set up
-    return 0;                                             //return with 0 is error
+    Serial.println("Get Picture Failed");               //Could not get the picture
+    CameraCleanReturn();                                //clean up camera set up
+    return 0;                                           //return with 0 is error
   }
-  //  Serial.println("Picture OK");                       //testing
-  CameraCleanReturn();                                //Got here all is good, clean up
+  //  Serial.println("Picture OK");                     //testing
+  CameraCleanReturn();                                  //Got here all is good, clean up
 
-  EIC->INTFLAG.reg = EIC_INTFLAG_EXTINT(0);     //reset the IRQ Flag
+  EIC->INTFLAG.reg = EIC_INTFLAG_EXTINT(0);             //reset the IRQ Flag
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);
 
   return 1;
 }
 
 void CameraCleanReturn() {                              //Clean up Camera setup to return
-  digitalWrite(Cam_power, Cam_power_OFF);         //Serial and SPI camera power OFF
-  digitalWrite(Sel0, LOW);                          //LOW on select to connect to Host
-  IRQreference = millis();                          //capture millis for next time, start of interrupt
+  digitalWrite(Cam_power, Cam_power_OFF);               //Serial and SPI camera power OFF
+  digitalWrite(Sel0, LOW);                              //LOW on select to connect to Host
+  IRQreference = millis();                              //capture millis for next time, start of interrupt
 
-  Bank0size = writtenPictureSize;     //save the size for later
+  Bank0size = writtenPictureSize;                       //save the size for later
 
   Serial.print("\n\rphotosize = "); Serial.println(Bank0size, HEX);
   Serial.print("filename is = "); Serial.println(args[1]);
 
   WriteText();
 
-  // char filenameS[] = "XS00000PSS";        //create filename templet for name SPI, SS = size of file for Queue
+  // char filenameS[] = "XS00000PSS";        //create filename template for name SPI, SS = size of file for Queue
   // all ok add to host Queue
   //
   filenameS[7] = 'P';
@@ -1613,7 +1610,7 @@ void CameraCleanReturn() {                              //Clean up Camera setup 
   addFileToQueue(filenameS);
   Serial.println(filenameS);
 
-  EIC->INTFLAG.reg = EIC_INTFLAG_EXTINT(0);     //reset the IRQ Flag
+  EIC->INTFLAG.reg = EIC_INTFLAG_EXTINT(0);             //reset the IRQ Flag
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING);
 }
 //
@@ -1629,38 +1626,38 @@ void  WriteText(void) {
   //--  Send the Text file to the SD Card   ---------
   //  here args[1] contains file name with .jpg extension
   //
-  int x = strlen(args[1]);                             //get the length of the name + ext
-  args[1][x - 3] = ('t');                              //rewrite extension to txt
+  int x = strlen(args[1]);                              //get the length of the name + ext
+  args[1][x - 3] = ('t');                               //rewrite extension to txt
   args[1][x - 2] = ('x');
   args[1][x - 1] = ('t');
 
-  if (SD.exists(args[1])) {                       //check if file already exists
-    SD.remove(args[1]);                                       //will erase existing file
-    Serial.println("erasing existing TextFile");            //say it
+  if (SD.exists(args[1])) {                             //check if file already exists
+    SD.remove(args[1]);                                 //will erase existing file
+    Serial.println("erasing existing TextFile");        //say it
   }
 
-  TextFile = SD.open(args[1], FILE_WRITE);             //Open to write file named TextFile
-  TextFile.seek(0);                                    //Point to first entry in file
+  TextFile = SD.open(args[1], FILE_WRITE);              //Open to write file named TextFile
+  TextFile.seek(0);                                     //Point to first entry in file
   if (!TextFile) {
     return;
   }
 
-  //                                                 //file can open now write stock text
-  for (int y = 0; y < 14; y++) {                    //buffer to SD file .txt
-    TextFile.println(*(textlist + y));              //write to file lines pointed to by list
-  }                                                 //full stock Text file completed here
+  //                                                    //file can open now write stock text
+  for (int y = 0; y < 14; y++) {                        //buffer to SD file .txt
+    TextFile.println(*(textlist + y));                  //write to file lines pointed to by list
+  }                                                     //full stock Text file completed here
   TextFile.println("----------------------------------------\n\r");  //spacer between text blocks
   //
   //  Now add User buffer at end of text file
   //
-  strcat(user_text_buf0, ("\n\r** END **"));          // note end of text file
-  //            strcat(user_text_buf0,(NULL));                    //set end of text marker
-  for (int x = 0; x < strlen(user_text_buf0); x++) {  //Look at user text buffer
-    TextFile.write(user_text_buf0[x]);            //write the data in the text buffer to SD
+  strcat(user_text_buf0, ("\n\r** END **"));            // note end of text file
+  //            strcat(user_text_buf0,(NULL));          //set end of text marker
+  for (int x = 0; x < strlen(user_text_buf0); x++) {    //Look at user text buffer
+    TextFile.write(user_text_buf0[x]);                  //write the data in the text buffer to SD
   }
   //
-  TextFile.flush();                                 //clear SD file buffer
-  TextFile.close();                                 //close the file here
+  TextFile.flush();                                     //clear SD file buffer
+  TextFile.close();                                     //close the file here
   //
   // Clear the buffer
   user_text_buf0[0] = '\0';
@@ -1679,10 +1676,10 @@ void  WriteText(void) {
 
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 int cmd_upload() {                      //command to upload a file to the Host use SD for now.
-  detachInterrupt(digitalPinToInterrupt(SerialIRQin));  //detach the serialin IRQ during SD operations - SD uses IRQ itself
+  detachInterrupt(digitalPinToInterrupt(SerialIRQin));    //detach the serialin IRQ during SD operations - SD uses IRQ itself
 
   Serial.println("upload command");
-  IRQreference = millis();                          //capture millis for next time, start of interrupt
+  IRQreference = millis();                                //capture millis for next time, start of interrupt
 
   attachInterrupt(digitalPinToInterrupt(SerialIRQin), Hostinterupt, FALLING); //reattach interrupts to Host
   return 1;
@@ -1690,7 +1687,7 @@ int cmd_upload() {                      //command to upload a file to the Host u
 //FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 const int IO[] = {A6, 3, 4, 9, 10, 11, 12, 13};
 
-int cmd_io() {                      //command to upload a file to the Host use SD for now.
+int cmd_io() {                                            //command to upload a file to the Host use SD for now.
   int x = atoi(args[1]);
   if (x < 0 || x > 7) {
     Serial.println("input only 0 to 7");
@@ -1700,8 +1697,8 @@ int cmd_io() {                      //command to upload a file to the Host use S
   int y = (IO[x]);
   Serial.printf("Current value is: %d", y);
 
-  char* cp = (args[2]);             //make cp point to beginning args[2]
-  char z = *cp;                     //z is the value at pointer
+  char* cp = (args[2]);                                   //make cp point to beginning args[2]
+  char z = *cp;                                           //z is the value at pointer
   if (z == 'H') {
     Serial.println("setting to H");
     digitalWrite(y, HIGH);
@@ -1741,42 +1738,42 @@ int cmd_ana() {
 int cmd_takeSphoto() {        //19 - take a serial photo get a file name then place it in the Host Queue
   Serial.printf("P0Maddress = %d\nSerial photo ID = %c", readintFromfram(PCSaddress), (char)readbyteFromfram(ID));
 
-  int x = (readintFromfram(PCSaddress));    //get next serial photo name
+  int x = (readintFromfram(PCSaddress));                  //get next serial photo name
   x++;
   if (x > 99999) {
     x = 0;
   };
-  writeintfram(x, PCSaddress);              //inc and write for next time
+  writeintfram(x, PCSaddress);                            //inc and write for next time
 
-  itoa(x, ascii, 10);                      //convert PCM photo count x to ascii string
-  int z = 0;                               //to count number of valid entries in array
+  itoa(x, ascii, 10);                                     //convert PCM photo count x to ascii string
+  int z = 0;                                              //to count number of valid entries in array
   for (int i = 0; ascii[i] != '\0'; i++) {
     z++;
   };  //find null char, z now points to pointer
-  uint16_t  y = 7 - z;                     //where to place lsd in mission buffer
-  for (uint16_t x = 0 ; x < z; x++) {      //how many characters
-    filenameS[y] = ascii[x];           //transfer from aacii array to proper location in text_mission
-    y++;                               //pointer to text_mission array
+  uint16_t  y = 7 - z;                                    //where to place lsd in mission buffer
+  for (uint16_t x = 0 ; x < z; x++) {                     //how many characters
+    filenameS[y] = ascii[x];                              //transfer from aacii array to proper location in text_mission
+    y++;                                                  //pointer to text_mission array
   }
   //
-  filenameS[0] = readbyteFromfram(ID);    //Get team ID letter, place it as first letter of file name
+  filenameS[0] = readbyteFromfram(ID);                    //Get team ID letter, place it as first letter of file name
   //
   //Serial.println(filenameS) is ready to use as name on file
 
-  for (int x = 0; x < 10; x++) { //clear args[1]
-    args[1][x] = '\0';          //clear args[1]
+  for (int x = 0; x < 10; x++) {
+    args[1][x] = '\0';                                    //clear args[1]
   }
-  for (int x = 0; x < 7; x++) { //move number of chartors
-    args[1][x] = filenameS[x]; //move the filenameS into args[1]
+  for (int x = 0; x < 7; x++) {                           //move number of chartors
+    args[1][x] = filenameS[x];                            //move the filenameS into args[1]
   }
 
-  Serial.println (args[1]);          //output the file name part of the header no extension
+  Serial.println (args[1]);                               //output the file name part of the header no extension
 
-  cmd_sphoto();                     //take the serial photo and store it on SD with the args[1].jpg name
+  cmd_sphoto();                                           //take the serial photo and store it on SD with the args[1].jpg name
   //
   //  now take SD file and send to to Queue
   //
-  Bank0size = writtenPictureSize;     //save the size for later
+  Bank0size = writtenPictureSize;                         //save the size for later
   //
   // now have name and size...
   // now have the information to put into Queue
@@ -1795,30 +1792,30 @@ int cmd_takeSphoto() {        //19 - take a serial photo get a file name then pl
 //      Enter without args[1] set will assign VUXXXXX file name with x being count up
 //
 int cmd_view() {
-  if (strlen(args[1]) == 0) {         //if no file name given, give it VU perfix for view file
-    itoa(photonumber, PN, 10);       //Place counting up int photonumber into the PN char array
-    photonumber++;                    // inc to next number
-    PN[0] = 'V'  ;                    //force ID code to view code for file storage
-    PN[1] = 'C'  ;                    //forced ID code
+  if (strlen(args[1]) == 0) {                             //if no file name given, give it VU perfix for view file
+    itoa(photonumber, PN, 10);                            //Place counting up int photonumber into the PN char array
+    photonumber++;                                        // inc to next number
+    PN[0] = 'V'  ;                                        //force ID code to view code for file storage
+    PN[1] = 'C'  ;                                        //forced ID code
     strcat(args[1], PN);
   }
   Serial.println("vc start");
   //
-  cmd_sphoto();                     //take the serial photo and store it on SD with the args[1].jpg name
+  cmd_sphoto();                                           //take the serial photo and store it on SD with the args[1].jpg name
   //
   //  replace extension to jpg
-  int x = strlen(args[1]);                             //get the length of the name + ext
-  args[1][x - 3] = ('j');                              //rewrite extension to jpg
+  int x = strlen(args[1]);                                //get the length of the name + ext
+  args[1][x - 3] = ('j');                                 //rewrite extension to jpg
   args[1][x - 2] = ('p');
   args[1][x - 1] = ('g');
-  FsDateTime::setCallback(dateTime);            //set time and date for file************************************
-  File dataFile = SD.open(args[1]);                 //file name here
-  x = strlen(args[1]);                             //get the length of the name + ext
-  args[1][x - 4] = ('\0');                         //rewrite extension from jpg to header header info
-  Serial.print (args[1]);                         //output the file name part of the header
-  Serial.print('P');                              // P char place holder for photo type file
-  Serial.print(writtenPictureSize / 256, HEX);    // output
-  Serial.print(writtenPictureSize % 256, HEX);    //output
+  FsDateTime::setCallback(dateTime);                      //set time and date for file************************************
+  File dataFile = SD.open(args[1]);                       //file name here
+  x = strlen(args[1]);                                    //get the length of the name + ext
+  args[1][x - 4] = ('\0');                                //rewrite extension from jpg to header header info
+  Serial.print (args[1]);                                 //output the file name part of the header
+  Serial.print('P');                                      // P char place holder for photo type file
+  Serial.print(writtenPictureSize / 256, HEX);            // output
+  Serial.print(writtenPictureSize % 256, HEX);            //output
 
   if (!dataFile) {
     Serial.println("error opening file");
@@ -1826,15 +1823,15 @@ int cmd_view() {
   }
 
   int i = 0;
-  while (dataFile.available()) {      //data still in file
-    if (i % 32 == 0) {                //formatting for each line
-      Serial.println();               //send 32 char per line
+  while (dataFile.available()) {                          //data still in file
+    if (i % 32 == 0) {                                    //formatting for each line
+      Serial.println();                                   //send 32 char per line
     }
-    uint8_t x = dataFile.read();      //get the data from file
+    uint8_t x = dataFile.read();                          //get the data from file
     Serial.printf("%2X", x);
-    i++;                              // to next data to form 16 colums
+    i++;                                                  // to next data to form 16 colums
   }
-  dataFile.close();                   //close the data file
+  dataFile.close();                                       //close the data file
 
   Serial.println();
   //  Serial.println(writtenPictureSize, HEX);
@@ -1853,7 +1850,7 @@ int cmd_view() {
 //---- Communication command structure -------------------------
 //
 #define GetStatus (0x10)
-#define DownLoadfile (0x12)   //Download a file from master to microlab
+#define DownLoadfile (0x12)                               //Download a file from master to microlab
 #define GetMLID (0x11)
 #define Ack (0x5A)
 #define Syncback (0x55)
@@ -1870,19 +1867,19 @@ int cmd_view() {
 #define RTCday    (3)
 #define RTCmonth  (4)
 #define RTCyear   (5)
-int RTCarray[] = {1, 2, 3, 4, 5, 6}; //real time clock array storage locations RTCsec
+int RTCarray[] = {1, 2, 3, 4, 5, 6};                      //real time clock array storage locations RTCsec
 
 //---------  Photo Header structure -----------------------------
-#define ID0  (0);  //("X")  index to 1st ID Letter
-#define ID1  (1);  //("Y")  index to 2nd ID Letter
-#define PN5  (2);  // photo number
+#define ID0  (0);                                         //("X")  index to 1st ID Letter
+#define ID1  (1);                                         //("Y")  index to 2nd ID Letter
+#define PN5  (2);                                         // photo number
 #define PN4  (3);
 #define PN3  (4);
 #define PN2  (5);
 #define PN1  (6);
 #define PN0  (7);
-#define TY   (8);   //type "P" photo
-#define MSD  (9);   //length of jpg file
+#define TY   (8);                                         //type "P" photo
+#define MSD  (9);                                         //length of jpg file
 #define LSD  (10);
 //
 //
@@ -1901,40 +1898,34 @@ int RTCarray[] = {1, 2, 3, 4, 5, 6}; //real time clock array storage locations R
 */
 //---- Serial input from Master controller
 
-//#define Sel0 (A4)           //serial selector i/o select
+//#define Sel0 (A4)                                       //serial selector i/o select
 #define MasterIn (HIGH)
-#define SerialIRQin  (0) //(IO3)   //serial 1 rx input used for interrupt
+#define SerialIRQin  (0) //(IO3)                          //serial 1 rx input used for interrupt
 
-const long FmHostRequestTimeout = 5000;    //Time to wait for serial command timeout Micro sec
+const long FmHostRequestTimeout = 5000;                   //Time to wait for serial command timeout Micro sec
 const int long valuemasterlowabort = 100000;
 //
-#define TimeTimeout    (30)    //Time to wait for time abort fails 
-#define ArmFmHostRequest     (10)   // if serial input idle for > 100ms must be command
-#define loopcount1     (1000)    //for testing main loop heartbeat time
+#define TimeTimeout    (30)                               //Time to wait for time abort fails
+#define ArmFmHostRequest     (10)                         // if serial input idle for > 100ms must be command
+#define loopcount1     (1000)                             //for testing main loop heartbeat time
 
 //-----FmHostRequest Storage ------------------------------------------
 
-int FmHostRequest = 0x00;           //for command byte from master
-int Armed = 0x00;             //Flag to Arm the command input
-int Timeout = 1;              //
-int val = 0;                  //
-int TempReg0 = 0;             // temperary variable
-int ErrorCode = 0;            // starting error
-//unsigned long looptimebase = 0;         // loop heartbeat time
-unsigned long entrytime = 0;  //
-//unsigned long int IRQreference = 0; // 1st read in setup for proper counting
-//boolean toggle = false;
-int softuarterror = 0;      //0 = no error, 1 = timeout error, >1 = ?? not defined
-long long softtimeout = 2500000;    //  Microseconds softtimeout for received data was 15 n0w 25
-long CharWait = 1100;     //microsec between characters wait time 100;//500;//
+int FmHostRequest = 0x00;                                 //for command byte from master
+int Armed = 0x00;                                         //Flag to Arm the command input
+int Timeout = 1;
+int val = 0;
+int TempReg0 = 0;                                         // temporary variable
+int ErrorCode = 0;                                        // starting error
+unsigned long entrytime = 0;
+int softuarterror = 0;                                    //0 = no error, 1 = timeout error, >1 = ?? not defined
+long long softtimeout = 2500000;                          // Microseconds soft timeout for received data was 15 n0w 25
+long CharWait = 1100;                                     //microseconds between characters wait time
 //
-unsigned long int testtime = 0;  //used for test looptiming only
-#define testlooptime  (40000) //
-uint16_t testcount = 0;       // used in test to count number of loops
-//
-//#define softuartrate (104) //software loop
-//#define softuartinpin (0)//(0) //
-//#define softuartoutpin (1)//(1) //
+unsigned long int testtime = 0;                           //used for test looptiming only
+#define testlooptime  (40000)
+uint16_t testcount = 0;                                   // used in test to count number of loops
+
 char data = 0;
 //
 
@@ -1943,8 +1934,6 @@ void Readmaster();
 void serial1Flush();
 void printError(int x);
 void Hostinterupt();
-//void GetFmHostRequest();
-//
 
 //
 //---------------------------------------------------------------------------------
@@ -1952,39 +1941,39 @@ void  softuartwrite(uint8_t data);
 byte  softuartread();
 
 void Chardelay() {
-  delayMicroseconds(CharWait);           //delay to let master to recover
+  delayMicroseconds(CharWait);                            //delay to let master to recover
 }
 //*****************************************
 // SOFTWARE SERIAL READ INPUT
 //*****************************************
 //
 byte softuartread() {
-  byte setbit = 0b00000001;                    //Mask of bit to set for incomming data
-  byte dataByte = 0;                           //Clear data receive byte
-  unsigned long i = softtimeout;               //set softread timeout counter
-  while (digitalRead(softuartinpin) == HIGH) {   //Waiting for startbit
+  byte setbit = 0b00000001;                               //Mask of bit to set for incoming data
+  byte dataByte = 0;                                      //Clear data receive byte
+  unsigned long i = softtimeout;                          //set soft read timeout counter
+  while (digitalRead(softuartinpin) == HIGH) {            //Waiting for startbit
     delayMicroseconds(1);
-    i--;                                          //count down to error
+    i--;                                                  //count down to error
     if (i == 0) {
-      softuarterror = 1;                        //set timeout error
+      softuarterror = 1;                                  //set timeout error
       return 0;
     }
   }
   // found start bit falling edge
-  delayMicroseconds(softuartrate / 2);          //one half bit time
-  delayMicroseconds(softuartrate);              //delay past start bit into 1 data bit
-  for (int i = 0; i < 8; i++) {                 //now do it for 8 bit times
-    if (digitalRead(softuartinpin) == HIGH) {   //look at the bit in the center
-      dataByte = dataByte + setbit;             //Set bit in dataByte
-      setbit = setbit * 2;                      //advance bit to next location
+  delayMicroseconds(softuartrate / 2);                    //one half bit time
+  delayMicroseconds(softuartrate);                        //delay past start bit into 1 data bit
+  for (int i = 0; i < 8; i++) {                           //now do it for 8 bit times
+    if (digitalRead(softuartinpin) == HIGH) {             //look at the bit in the center
+      dataByte = dataByte + setbit;                       //Set bit in dataByte
+      setbit = setbit * 2;                                //advance bit to next location
     }
     else {
-      setbit = setbit * 2;                      //No set bit just advance
+      setbit = setbit * 2;                                //No set bit just advance
     }
-    delayMicroseconds(softuartrate);              //wait a bit time
+    delayMicroseconds(softuartrate);                      //wait a bit time
   }
-  softuarterror = 0;                            //reset error to no error data ok
-  return dataByte;                                  //return with received data
+  softuarterror = 0;                                      //reset error to no error data ok
+  return dataByte;                                        //return with received data
 }
 //
 //********************************************
